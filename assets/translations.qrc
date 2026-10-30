@@ -1,0 +1,11 @@
+<RCC><qresource prefix="/translations">
+<file alias="qtbase_zh_TW.qm">translations/qtbase_zh_TW.qm</file>
+<file alias="qtbase_zh_CN.qm">translations/qtbase_zh_CN.qm</file>
+<file alias="qtbase_en.qm">translations/qtbase_en.qm</file>
+<file alias="qtbase_ja.qm">translations/qtbase_ja.qm</file>
+<file alias="qtbase_ko.qm">translations/qtbase_ko.qm</file>
+<file alias="qtbase_es.qm">translations/qtbase_es.qm</file>
+<file alias="qtbase_fr.qm">translations/qtbase_fr.qm</file>
+<file alias="qtbase_de.qm">translations/qtbase_de.qm</file>
+<file alias="qtbase_pt_BR.qm">translations/qtbase_pt_BR.qm</file>
+</qresource></RCC>

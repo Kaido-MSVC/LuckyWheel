@@ -1,0 +1,464 @@
+{
+  "date": "2026-10-30",
+  "applicationVersion": "2.0.8",
+  "distributionStatus": "GO - local release set; no upload performed",
+  "sources": [
+    {
+      "file": "qtmultimedia-everywhere-src-6.12.0.tar.xz",
+      "url": "https://download.qt.io/official_releases/qt/6.12/6.12.0/submodules/qtmultimedia-everywhere-src-6.12.0.tar.xz",
+      "sha256": "3143f53b64257ba2a0685c940f5dce476c75871ff86b516de45cfd54ea93a62d",
+      "sha1": "4283d57f3c73764ef1dc834dcefa6cf8fe9826b2",
+      "bytes": 10544184,
+      "sourceCommit": "6ca885f084a3984749d53bb50a0e08bdc60e86cc"
+    },
+    {
+      "file": "qtimageformats-everywhere-src-6.12.0.tar.xz",
+      "url": "https://download.qt.io/official_releases/qt/6.12/6.12.0/submodules/qtimageformats-everywhere-src-6.12.0.tar.xz",
+      "sha256": "0943132b5db8de6b6a7f1d162682173e8763c7ed94e80fd39113292845f67762",
+      "sha1": "75bd56fb9f387827cf0bf3dcb2834b2be556e264",
+      "bytes": 1848620,
+      "sourceCommit": "dc13f2fbff1d579cfb2eb2d9092e3563b4d05b8e"
+    },
+    {
+      "file": "qttranslations-everywhere-src-6.12.0.tar.xz",
+      "url": "https://download.qt.io/official_releases/qt/6.12/6.12.0/submodules/qttranslations-everywhere-src-6.12.0.tar.xz",
+      "sha256": "85929c0c30d6f273f23bd879bb69803ea17b010ab73cab2f8abf95357f6f6bbb",
+      "sha1": "056f262bb19db8f3e88ba637f910eb06d71543e9",
+      "bytes": 1745884,
+      "sourceCommit": "2811457ceff8f0c24a1c4d14f947a283a17239d0"
+    },
+    {
+      "file": "ffmpeg-9.0.1.tar.gz",
+      "url": "https://ffmpeg.org/releases/ffmpeg-9.0.1.tar.gz",
+      "sha256": "657dbf258cce6c0681714b6e40b8ca69e988c67ecfc2f7aab47574e6ebaceb38",
+      "sha1": "89c318905212e6b67e10e42ab10ab8007e0aefda",
+      "bytes": 18122748
+    },
+    {
+      "file": "zlib-1.3.1.tar.gz",
+      "url": "https://zlib.net/fossils/zlib-1.3.1.tar.gz",
+      "sha256": "9a93b2b7dfdac77ceba5a558a580e74667dd6fede4585b91eefb60f03b72df23",
+      "sha1": "f535367b1a11e2f9ac3bec723fb007fbc0d189e5",
+      "bytes": 1512791
+    },
+    {
+      "file": "qtbase-025bdad181de241e81bf853c8a2d7bf3d19261a9.tar.gz",
+      "url": "https://codeload.github.com/qt/qtbase/tar.gz/025bdad181de241e81bf853c8a2d7bf3d19261a9",
+      "sha256": "5045b90abc04c9403aedb2e44e1c696bf047930a6a6ca49d7242a0c139453978",
+      "sha1": "0088fd86750a56b10f52695d0f081a3d56251dce",
+      "bytes": 68727748,
+      "sourceCommit": "025bdad181de241e81bf853c8a2d7bf3d19261a9"
+    },
+    {
+      "file": "qtsvg-883a58532078d003cefef0a549bfe9f885ce41f5.tar.gz",
+      "url": "https://codeload.github.com/qt/qtsvg/tar.gz/883a58532078d003cefef0a549bfe9f885ce41f5",
+      "sha256": "a9f1f4d8b16ec54e2bbe96cfd2b5bcdaa153932275aa94fb76294c2d85ed3847",
+      "sha1": "3285baed3aea40c4dc4f8717dfa2d32b15ac9f65",
+      "bytes": 2629476,
+      "sourceCommit": "883a58532078d003cefef0a549bfe9f885ce41f5"
+    },
+    {
+      "file": "qt5-build-recipes-ef25002ed292b132d1ed3246bfcee1d24a9cd966.tar.gz",
+      "url": "https://codeload.github.com/qt/qt5/tar.gz/ef25002ed292b132d1ed3246bfcee1d24a9cd966",
+      "sha256": "bd178691618f3b89b16043016c82de522be616bc99e6a8ec1c3ce48000dadef8",
+      "sha1": "fe37ec2b00694920758871ba0fd5f3ea350c663e",
+      "bytes": 658766,
+      "sourceCommit": "ef25002ed292b132d1ed3246bfcee1d24a9cd966"
+    }
+  ],
+  "binaries": [
+    {
+      "file": "avcodec-63.dll",
+      "sha256": "8a973b82493d8c1b5d0509d98630e47692077ea2783b194fe5a713d0bc6876db",
+      "origin": "Qt kit",
+      "sourceRelativePath": "bin/avcodec-63.dll"
+    },
+    {
+      "file": "avformat-63.dll",
+      "sha256": "3cbbe526c6b827fba6c8eb0001f590f76b6e7ad89d831b584ec284e8b7da8f50",
+      "origin": "Qt kit",
+      "sourceRelativePath": "bin/avformat-63.dll"
+    },
+    {
+      "file": "avutil-61.dll",
+      "sha256": "40a373bf520707b54ac5db5c093bcc0f2a095c31912a29a3200412b0bd30fb1f",
+      "origin": "Qt kit",
+      "sourceRelativePath": "bin/avutil-61.dll"
+    },
+    {
+      "file": "concrt140.dll",
+      "sha256": "2405355f0a58067b258f8df33c327e3a3d716eaac5a3a5aebb757842d85bd376",
+      "origin": "MSVC 14.44 CRT redist",
+      "sourceRelativePath": "concrt140.dll"
+    },
+    {
+      "file": "d3dcompiler_47.dll",
+      "sha256": "d28d341306db9067c779d2cfe5865c3840e3a863efa47a2e0b0d4a1b906f6158",
+      "origin": "Windows SDK 10.0.28000.0 redist",
+      "sourceRelativePath": "Redist/D3D/x64/d3dcompiler_47.dll"
+    },
+    {
+      "file": "dxcompiler.dll",
+      "sha256": "650bdfe3c06468cb7e3306e6251e4fbee192ccd103f5c0007579ab1342759a77",
+      "origin": "Windows SDK 10.0.28000.0 redist",
+      "sourceRelativePath": "Redist/D3D/x64/dxcompiler.dll"
+    },
+    {
+      "file": "dxil.dll",
+      "sha256": "e69b838018a1e0025201edbe9f166d061807cab2f02221c18c53ea6f5e96f0b5",
+      "origin": "Windows SDK 10.0.28000.0 redist",
+      "sourceRelativePath": "Redist/D3D/x64/dxil.dll"
+    },
+    {
+      "file": "generic/qtuiotouchplugin.dll",
+      "sha256": "5de903fa0ca5680243c01b8ed7ad0e6c27a6d00c7b29e0a51f581d32e0cdcde7",
+      "origin": "Qt kit",
+      "sourceRelativePath": "plugins/generic/qtuiotouchplugin.dll"
+    },
+    {
+      "file": "iconengines/qsvgicon.dll",
+      "sha256": "09d02f929b537f9ba83834651b17c70fd89dcacbe22012b9fae3b529efa9c390",
+      "origin": "Qt kit",
+      "sourceRelativePath": "plugins/iconengines/qsvgicon.dll"
+    },
+    {
+      "file": "imageformats/qgif.dll",
+      "sha256": "a1ea6be36c9aedbc54bf88bf391be85f1477d1d80f831f6eaf6a4d10fac8d027",
+      "origin": "Qt kit",
+      "sourceRelativePath": "plugins/imageformats/qgif.dll"
+    },
+    {
+      "file": "imageformats/qicns.dll",
+      "sha256": "1b05278d3e8997d1527a2e65f0806e33279088a92ff0c983164cce99dc78adc3",
+      "origin": "Qt kit",
+      "sourceRelativePath": "plugins/imageformats/qicns.dll"
+    },
+    {
+      "file": "imageformats/qico.dll",
+      "sha256": "964b39989a4a8dccd809c39b8e7d5813990aa31676d1d39b18aeea97336ddab7",
+      "origin": "Qt kit",
+      "sourceRelativePath": "plugins/imageformats/qico.dll"
+    },
+    {
+      "file": "imageformats/qjpeg.dll",
+      "sha256": "9e67dc18c9f67141f5da20646b63a5ee4a57f8cfdad6b1b3c4c5f70e49ace065",
+      "origin": "Qt kit",
+      "sourceRelativePath": "plugins/imageformats/qjpeg.dll"
+    },
+    {
+      "file": "imageformats/qsvg.dll",
+      "sha256": "e8f2c80df916b363738d6f6dc112ac4555a42278347e78c0b609a55d1adf70cb",
+      "origin": "Qt kit",
+      "sourceRelativePath": "plugins/imageformats/qsvg.dll"
+    },
+    {
+      "file": "imageformats/qtga.dll",
+      "sha256": "d103ddb4c0609f7d1bfe2c788745f1009cae2cd3c5827ef108fe4c8c535dfb3d",
+      "origin": "Qt kit",
+      "sourceRelativePath": "plugins/imageformats/qtga.dll"
+    },
+    {
+      "file": "imageformats/qtiff.dll",
+      "sha256": "f92d403b82755884bc0e20d924da8fd4328426c1c19d4f7b5677ca60b8585bf0",
+      "origin": "Qt kit",
+      "sourceRelativePath": "plugins/imageformats/qtiff.dll"
+    },
+    {
+      "file": "imageformats/qwbmp.dll",
+      "sha256": "8225f681ae69327ee519c58b7a9b4d315316584fb9b75c554bd48943f0a3d2ae",
+      "origin": "Qt kit",
+      "sourceRelativePath": "plugins/imageformats/qwbmp.dll"
+    },
+    {
+      "file": "imageformats/qwebp.dll",
+      "sha256": "237afef6be8253fd57559516b2ba2dbeafdccb72b7416ad41f9fd15548f75172",
+      "origin": "Qt kit",
+      "sourceRelativePath": "plugins/imageformats/qwebp.dll"
+    },
+    {
+      "file": "msvcp140.dll",
+      "sha256": "0f885b509a685d2bbfa652fed26b5fb31d88fbdab0a978c641d1c7b8aa460aa9",
+      "origin": "MSVC 14.44 CRT redist",
+      "sourceRelativePath": "msvcp140.dll"
+    },
+    {
+      "file": "msvcp140_1.dll",
+      "sha256": "bfad5aef4c63a669e3c140655cdfdf395b6c979b400a447bd5dcb65ed8826c3d",
+      "origin": "MSVC 14.44 CRT redist",
+      "sourceRelativePath": "msvcp140_1.dll"
+    },
+    {
+      "file": "msvcp140_2.dll",
+      "sha256": "3ea06f0ee098b4823cb79599df3780e7f23cce52c19aac31d2a0d47efe33a5e9",
+      "origin": "MSVC 14.44 CRT redist",
+      "sourceRelativePath": "msvcp140_2.dll"
+    },
+    {
+      "file": "msvcp140_atomic_wait.dll",
+      "sha256": "640b2aefced484d0368eea5bdd06addd0658a3a70a49256e560d6923b404a479",
+      "origin": "MSVC 14.44 CRT redist",
+      "sourceRelativePath": "msvcp140_atomic_wait.dll"
+    },
+    {
+      "file": "msvcp140_codecvt_ids.dll",
+      "sha256": "f2069a52880ec885ee7f0511186100eb7fada0411a2b4948fafea7735b878a18",
+      "origin": "MSVC 14.44 CRT redist",
+      "sourceRelativePath": "msvcp140_codecvt_ids.dll"
+    },
+    {
+      "file": "multimedia/ffmpegmediaplugin.dll",
+      "sha256": "4e0a59b78a7d6addd35b2ccb9b1df63c98b1e995e064a6b5b5698f545e7355ab",
+      "origin": "Qt kit",
+      "sourceRelativePath": "plugins/multimedia/ffmpegmediaplugin.dll"
+    },
+    {
+      "file": "multimedia/windowsmediaplugin.dll",
+      "sha256": "841da4bb4914817378193f5c2bc6e8b37773826c34f178fd4dbf14c1be084b0a",
+      "origin": "Qt kit",
+      "sourceRelativePath": "plugins/multimedia/windowsmediaplugin.dll"
+    },
+    {
+      "file": "networkinformation/qnetworklistmanager.dll",
+      "sha256": "cc66815a9621f41c7fc4925d320a44f564f5d69722a1a23a731753592e5e8058",
+      "origin": "Qt kit",
+      "sourceRelativePath": "plugins/networkinformation/qnetworklistmanager.dll"
+    },
+    {
+      "file": "opengl32sw.dll",
+      "sha256": "b04de4541863bc7d8879040a78889c4849c1b1da2784c4630f734c146c2998ce",
+      "origin": "Qt kit",
+      "sourceRelativePath": "bin/opengl32sw.dll"
+    },
+    {
+      "file": "platforms/qwindows.dll",
+      "sha256": "12eef54bcdb6711b2722e9cef983d91a54546565a96b684d7bd9e2a7370fde92",
+      "origin": "Qt kit",
+      "sourceRelativePath": "plugins/platforms/qwindows.dll"
+    },
+    {
+      "file": "Qt6Core.dll",
+      "sha256": "39175459c4837c8cc0f709a637fb6eadb25d696785109c8393559ec876f02703",
+      "origin": "Qt kit",
+      "sourceRelativePath": "bin/Qt6Core.dll"
+    },
+    {
+      "file": "Qt6Gui.dll",
+      "sha256": "37c79b48b9cc2d9a03d21410c26fea683d236f9280f5c9aaab85d980759f2835",
+      "origin": "Qt kit",
+      "sourceRelativePath": "bin/Qt6Gui.dll"
+    },
+    {
+      "file": "Qt6Multimedia.dll",
+      "sha256": "d00e4ade80368055bff8af92bc2bf56485ee38458ec3a88cae673b0e17a9f8d4",
+      "origin": "Qt kit",
+      "sourceRelativePath": "bin/Qt6Multimedia.dll"
+    },
+    {
+      "file": "Qt6Network.dll",
+      "sha256": "9825558f184c64f639c4b8663650cee0ae8ffe01c18d98ff76f006a02389965f",
+      "origin": "Qt kit",
+      "sourceRelativePath": "bin/Qt6Network.dll"
+    },
+    {
+      "file": "Qt6Sql.dll",
+      "sha256": "1d847a23da0f3dc568e3fb8a98fbb210ba122a3b7f3db51b5cc69a2edfae74a6",
+      "origin": "Qt kit",
+      "sourceRelativePath": "bin/Qt6Sql.dll"
+    },
+    {
+      "file": "Qt6Svg.dll",
+      "sha256": "cce84059f1857ff1859db7c4fe10334e603d9ca81eb4d5f0a22ca0ac515b340c",
+      "origin": "Qt kit",
+      "sourceRelativePath": "bin/Qt6Svg.dll"
+    },
+    {
+      "file": "Qt6Widgets.dll",
+      "sha256": "74138ca203c378a62367cc398e4dac07dec729b5a121486dbb26109854c17ae5",
+      "origin": "Qt kit",
+      "sourceRelativePath": "bin/Qt6Widgets.dll"
+    },
+    {
+      "file": "sqldrivers/qsqlibase.dll",
+      "sha256": "010f515a6d574bb23d30e3e11122151a078ce95b3cf1d6a7b6397e17278e64a0",
+      "origin": "Qt kit",
+      "sourceRelativePath": "plugins/sqldrivers/qsqlibase.dll"
+    },
+    {
+      "file": "sqldrivers/qsqlite.dll",
+      "sha256": "021b009884dac1e64ed6dc3a3a817ef36a1b93ca37607ef6722a1f16b15ba852",
+      "origin": "Qt kit",
+      "sourceRelativePath": "plugins/sqldrivers/qsqlite.dll"
+    },
+    {
+      "file": "sqldrivers/qsqlmimer.dll",
+      "sha256": "1a745b34a17047ebd82e1bb529bbb90b0fce78eb642e44bdd2ef81b5007c95bd",
+      "origin": "Qt kit",
+      "sourceRelativePath": "plugins/sqldrivers/qsqlmimer.dll"
+    },
+    {
+      "file": "sqldrivers/qsqloci.dll",
+      "sha256": "5fffdb290c8173d506b964ccbb6ae3a014a7b9c53fcf078f411f92432c7127ff",
+      "origin": "Qt kit",
+      "sourceRelativePath": "plugins/sqldrivers/qsqloci.dll"
+    },
+    {
+      "file": "sqldrivers/qsqlodbc.dll",
+      "sha256": "34849e9c651e54ad2d6ad6852aa9f39b92c739f1f6d4300d8f29fe49bf549e87",
+      "origin": "Qt kit",
+      "sourceRelativePath": "plugins/sqldrivers/qsqlodbc.dll"
+    },
+    {
+      "file": "sqldrivers/qsqlpsql.dll",
+      "sha256": "9b3840380ff9727a98d961265274f2be1cd21164bb29e7f139a99189f3492067",
+      "origin": "Qt kit",
+      "sourceRelativePath": "plugins/sqldrivers/qsqlpsql.dll"
+    },
+    {
+      "file": "styles/qmodernwindowsstyle.dll",
+      "sha256": "db5ef23d50d53fa66920baea1240a17dd47c6a6037dc72ee0288b07a3396b2c9",
+      "origin": "Qt kit",
+      "sourceRelativePath": "plugins/styles/qmodernwindowsstyle.dll"
+    },
+    {
+      "file": "swresample-7.dll",
+      "sha256": "4dbcd7af686211f48adec8bc2036d46260e29b1c7fa3989ef6cd2d652235c9b6",
+      "origin": "Qt kit",
+      "sourceRelativePath": "bin/swresample-7.dll"
+    },
+    {
+      "file": "swscale-10.dll",
+      "sha256": "d9c866540bee73cb6b7e20d70171e8252b741836e0d299d8d3f345e003d40930",
+      "origin": "Qt kit",
+      "sourceRelativePath": "bin/swscale-10.dll"
+    },
+    {
+      "file": "tls/qcertonlybackend.dll",
+      "sha256": "bf7f2550a0c689ede7b90d71a8d6371c6a01b01a8aba26f0b755f3933fb78fe4",
+      "origin": "Qt kit",
+      "sourceRelativePath": "plugins/tls/qcertonlybackend.dll"
+    },
+    {
+      "file": "tls/qschannelbackend.dll",
+      "sha256": "f37162f9ff47bc552132314dbf1bf6d436edaee983ec67a9a175cb52e0c38045",
+      "origin": "Qt kit",
+      "sourceRelativePath": "plugins/tls/qschannelbackend.dll"
+    },
+    {
+      "file": "vccorlib140.dll",
+      "sha256": "19839407c3fdbc824e5bce189bf68ddf8097f12ec28b757797ffa0415c144ddd",
+      "origin": "MSVC 14.44 CRT redist",
+      "sourceRelativePath": "vccorlib140.dll"
+    },
+    {
+      "file": "vcruntime140.dll",
+      "sha256": "d5e4d9a3e835fa679450145d6a7d94e36573a509317111904d9b3712c30d9066",
+      "origin": "MSVC 14.44 CRT redist",
+      "sourceRelativePath": "vcruntime140.dll"
+    },
+    {
+      "file": "vcruntime140_1.dll",
+      "sha256": "1f2d41c4aa5db0bc33ebf7b66d72943a817d7ce6cbe880502a9403823633093f",
+      "origin": "MSVC 14.44 CRT redist",
+      "sourceRelativePath": "vcruntime140_1.dll"
+    },
+    {
+      "file": "vcruntime140_threads.dll",
+      "sha256": "219915cf20822f34d5e7c1fdd4e21ae7f3396881096c51036225fb8f84b47afa",
+      "origin": "MSVC 14.44 CRT redist",
+      "sourceRelativePath": "vcruntime140_threads.dll"
+    }
+  ],
+  "ffmpeg": [
+    {
+      "file": "avcodec-63.dll",
+      "sha256": "8a973b82493d8c1b5d0509d98630e47692077ea2783b194fe5a713d0bc6876db",
+      "configure": "--prefix=/c/FFmpeg-n9.0.1/build/msvc/installed --disable-programs --disable-doc --disable-debug --enable-network --disable-lzma --enable-pic --disable-vulkan --disable-v4l2-m2m --disable-decoder=truemotion1 --disable-avdevice --disable-avfilter --enable-zlib --extra-cflags='-IC:/zlib-1.3.1/build/amd64' --extra-ldflags='-LIBPATH:C:/zlib-1.3.1/build/amd64' --toolchain=msvc --enable-shared --disable-static",
+      "license": "LGPL version 2.1 or later"
+    },
+    {
+      "file": "avformat-63.dll",
+      "sha256": "3cbbe526c6b827fba6c8eb0001f590f76b6e7ad89d831b584ec284e8b7da8f50",
+      "configure": "--prefix=/c/FFmpeg-n9.0.1/build/msvc/installed --disable-programs --disable-doc --disable-debug --enable-network --disable-lzma --enable-pic --disable-vulkan --disable-v4l2-m2m --disable-decoder=truemotion1 --disable-avdevice --disable-avfilter --enable-zlib --extra-cflags='-IC:/zlib-1.3.1/build/amd64' --extra-ldflags='-LIBPATH:C:/zlib-1.3.1/build/amd64' --toolchain=msvc --enable-shared --disable-static",
+      "license": "LGPL version 2.1 or later"
+    },
+    {
+      "file": "avutil-61.dll",
+      "sha256": "40a373bf520707b54ac5db5c093bcc0f2a095c31912a29a3200412b0bd30fb1f",
+      "configure": "--prefix=/c/FFmpeg-n9.0.1/build/msvc/installed --disable-programs --disable-doc --disable-debug --enable-network --disable-lzma --enable-pic --disable-vulkan --disable-v4l2-m2m --disable-decoder=truemotion1 --disable-avdevice --disable-avfilter --enable-zlib --extra-cflags='-IC:/zlib-1.3.1/build/amd64' --extra-ldflags='-LIBPATH:C:/zlib-1.3.1/build/amd64' --toolchain=msvc --enable-shared --disable-static",
+      "license": "LGPL version 2.1 or later"
+    },
+    {
+      "file": "swresample-7.dll",
+      "sha256": "4dbcd7af686211f48adec8bc2036d46260e29b1c7fa3989ef6cd2d652235c9b6",
+      "configure": "--prefix=/c/FFmpeg-n9.0.1/build/msvc/installed --disable-programs --disable-doc --disable-debug --enable-network --disable-lzma --enable-pic --disable-vulkan --disable-v4l2-m2m --disable-decoder=truemotion1 --disable-avdevice --disable-avfilter --enable-zlib --extra-cflags='-IC:/zlib-1.3.1/build/amd64' --extra-ldflags='-LIBPATH:C:/zlib-1.3.1/build/amd64' --toolchain=msvc --enable-shared --disable-static",
+      "license": "LGPL version 2.1 or later"
+    },
+    {
+      "file": "swscale-10.dll",
+      "sha256": "d9c866540bee73cb6b7e20d70171e8252b741836e0d299d8d3f345e003d40930",
+      "configure": "--prefix=/c/FFmpeg-n9.0.1/build/msvc/installed --disable-programs --disable-doc --disable-debug --enable-network --disable-lzma --enable-pic --disable-vulkan --disable-v4l2-m2m --disable-decoder=truemotion1 --disable-avdevice --disable-avfilter --enable-zlib --extra-cflags='-IC:/zlib-1.3.1/build/amd64' --extra-ldflags='-LIBPATH:C:/zlib-1.3.1/build/amd64' --toolchain=msvc --enable-shared --disable-static",
+      "license": "LGPL version 2.1 or later"
+    }
+  ],
+  "translations": [
+    {
+      "file": "qtbase_de.qm",
+      "sha256": "a1483bae0385c380edad72b818ce7c2f54ba617ba4c709b2a34a76886d5b5f3d",
+      "copyright": "Copyright (C) The Qt Company Ltd. and other contributors.",
+      "license": "BSD-3-Clause"
+    },
+    {
+      "file": "qtbase_en.qm",
+      "sha256": "494ac9a2b2cb2fdeced353f4a9f898ed8dcf616e9bc667438c62681e3f7f79cf",
+      "copyright": "Copyright (C) The Qt Company Ltd. and other contributors.",
+      "license": "BSD-3-Clause"
+    },
+    {
+      "file": "qtbase_es.qm",
+      "sha256": "4ffda56ba3bb5414ab0482d1dde64a6f226e3488f6b7f3f11a150e01f53fa4c8",
+      "copyright": "Copyright (C) The Qt Company Ltd. and other contributors.",
+      "license": "BSD-3-Clause"
+    },
+    {
+      "file": "qtbase_fr.qm",
+      "sha256": "314243a55c32679ad473fdfe48dc7d66e973ad0fc8bf2164480c58dddb50c1a7",
+      "copyright": "Copyright (C) The Qt Company Ltd. and other contributors.",
+      "license": "BSD-3-Clause"
+    },
+    {
+      "file": "qtbase_ja.qm",
+      "sha256": "2b9581c69b975f59be505b127cd3c19d403ef3d12e0e8386fb97238223e9c1df",
+      "copyright": "Copyright (C) The Qt Company Ltd. and other contributors.",
+      "license": "BSD-3-Clause"
+    },
+    {
+      "file": "qtbase_ko.qm",
+      "sha256": "0179ed1b136e1cb3f583351eaa2c545ba3d83a6ee3f82c32505926a1a5f5f183",
+      "copyright": "Copyright (C) The Qt Company Ltd. and other contributors.",
+      "license": "BSD-3-Clause"
+    },
+    {
+      "file": "qtbase_pt_BR.qm",
+      "sha256": "3475d61604b938d459949801a906dbd34a8ca824ade94120015d676e208da859",
+      "copyright": "Copyright (C) The Qt Company Ltd. and other contributors.",
+      "license": "BSD-3-Clause"
+    },
+    {
+      "file": "qtbase_zh_CN.qm",
+      "sha256": "0481a9b92a6f0578400e960a7d5ee70217a6a450eaf7f98b7d32b8dbd0d58616",
+      "copyright": "Copyright (C) The Qt Company Ltd. and other contributors.",
+      "license": "BSD-3-Clause"
+    },
+    {
+      "file": "qtbase_zh_TW.qm",
+      "sha256": "21012b2b427f8d09d31ce9cae582ca27955b478ca3dc2ec18a3068d808638c6a",
+      "copyright": "Copyright (C) The Qt Company Ltd. and other contributors.",
+      "license": "BSD-3-Clause"
+    }
+  ],
+  "limitations": [
+    "Qt and FFmpeg were not rebuilt byte-for-byte; source correspondence verified using installed source SBOM, fixed commits and official FFmpeg recipe.",
+    "No GitHub push or public release has occurred. Sources are physically embedded in each binary package."
+  ],
+  "sourceVerification": "build-info/source-verification.json"
+}

@@ -1,0 +1,29 @@
+{
+    "language": "zh_TW",
+    "lockHash": "",
+    "lockSalt": "",
+    "prizes": [
+        {
+            "color": "#72b8ff",
+            "id": "example-a",
+            "limit": 3,
+            "name": "特別獎, A",
+            "remaining": 3,
+            "weight": 100000
+        },
+        {
+            "color": "#a8dca6",
+            "id": "example-b",
+            "limit": -1,
+            "name": "參加獎 B",
+            "remaining": -1,
+            "weight": 200000
+        }
+    ],
+    "round": 1,
+    "schema": 1,
+    "showSoldOut": true,
+    "sound": true,
+    "theme": "light",
+    "volume": 60
+}

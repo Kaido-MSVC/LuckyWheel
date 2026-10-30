@@ -1,0 +1,88 @@
+{
+  "archives": [
+    {
+      "file": "qtmultimedia-everywhere-src-6.12.0.tar.xz",
+      "sha256": "3143f53b64257ba2a0685c940f5dce476c75871ff86b516de45cfd54ea93a62d",
+      "bytes": 10544184
+    },
+    {
+      "file": "qtimageformats-everywhere-src-6.12.0.tar.xz",
+      "sha256": "0943132b5db8de6b6a7f1d162682173e8763c7ed94e80fd39113292845f67762",
+      "bytes": 1848620
+    },
+    {
+      "file": "qttranslations-everywhere-src-6.12.0.tar.xz",
+      "sha256": "85929c0c30d6f273f23bd879bb69803ea17b010ab73cab2f8abf95357f6f6bbb",
+      "bytes": 1745884
+    },
+    {
+      "file": "ffmpeg-9.0.1.tar.gz",
+      "sha256": "657dbf258cce6c0681714b6e40b8ca69e988c67ecfc2f7aab47574e6ebaceb38",
+      "bytes": 18122748
+    },
+    {
+      "file": "zlib-1.3.1.tar.gz",
+      "sha256": "9a93b2b7dfdac77ceba5a558a580e74667dd6fede4585b91eefb60f03b72df23",
+      "bytes": 1512791
+    },
+    {
+      "file": "qtbase-025bdad181de241e81bf853c8a2d7bf3d19261a9.tar.gz",
+      "sha256": "5045b90abc04c9403aedb2e44e1c696bf047930a6a6ca49d7242a0c139453978",
+      "bytes": 68727748
+    },
+    {
+      "file": "qtsvg-883a58532078d003cefef0a549bfe9f885ce41f5.tar.gz",
+      "sha256": "a9f1f4d8b16ec54e2bbe96cfd2b5bcdaa153932275aa94fb76294c2d85ed3847",
+      "bytes": 2629476
+    },
+    {
+      "file": "qt5-build-recipes-ef25002ed292b132d1ed3246bfcee1d24a9cd966.tar.gz",
+      "sha256": "bd178691618f3b89b16043016c82de522be616bc99e6a8ec1c3ce48000dadef8",
+      "bytes": 658766
+    }
+  ],
+  "modules": [
+    {
+      "module": "qtmultimedia",
+      "sourceSbomRecords": 3149,
+      "matched": 587,
+      "matchedAfterWindowsCRLF": 2562,
+      "missing": [],
+      "different": [],
+      "supplementedGitControlFiles": 0
+    },
+    {
+      "module": "qtimageformats",
+      "sourceSbomRecords": 508,
+      "matched": 102,
+      "matchedAfterWindowsCRLF": 406,
+      "missing": [],
+      "different": [],
+      "supplementedGitControlFiles": 0
+    },
+    {
+      "module": "qtbase",
+      "sourceSbomRecords": 23144,
+      "matched": 6974,
+      "matchedAfterWindowsCRLF": 16131,
+      "missing": [],
+      "different": [],
+      "supplementedGitControlFiles": 38,
+      "metadataDifference": "Resolved: .gitattributes declares .tag export-subst; archive substitutes the commit for $Format:%H$. Original .tag is supplied in supplement and matches source-SBOM SHA1 after Windows CRLF checkout.",
+      "supplementedExportSubstFiles": 1
+    },
+    {
+      "module": "qtsvg",
+      "sourceSbomRecords": 642,
+      "matched": 78,
+      "matchedAfterWindowsCRLF": 554,
+      "missing": [],
+      "different": [],
+      "supplementedGitControlFiles": 9,
+      "metadataDifference": "Resolved: .gitattributes declares .tag export-subst; archive substitutes the commit for $Format:%H$. Original .tag is supplied in supplement and matches source-SBOM SHA1 after Windows CRLF checkout.",
+      "supplementedExportSubstFiles": 1
+    }
+  ],
+  "supplementManifest": "supplement/index.json",
+  "verificationScope": "All four module source-SBOM files verified byte-for-byte or Windows checkout LF/CRLF conversion; omitted Git controls supplied separately; .tag metadata variance recorded."
+}

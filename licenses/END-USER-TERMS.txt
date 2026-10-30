@@ -1,0 +1,109 @@
+﻿LuckyWheel v2.0.8 — Microsoft component terms / Microsoft 元件條款
+Revision: 2026-10-30
+
+本條款僅針對以下 Microsoft DLL。LuckyWheel 自有程式仍採 MIT；Qt、FFmpeg
+及其他開源元件仍各自依原授權，包含 LGPL 替換、重新連結、除錯與逆向工程權利。
+選擇「同意」表示您同意下列 Microsoft 元件條款；不同意請結束並移除隨附 Microsoft DLL。
+本條款是您與 LuckyWheel 發布者 kaido-MSVC 之間的約定，不代表 Microsoft 背書。
+以下英文為完整接收者條款；Microsoft 上游授權全文隨附於 licenses 資料夾。
+
+1. Scope and acceptance
+These terms are between you and kaido-MSVC, the publisher of LuckyWheel, and apply
+ONLY to the following unmodified Microsoft components bundled with LuckyWheel:
+d3dcompiler_47.dll, dxcompiler.dll, dxil.dll, and the Visual C++ runtime DLLs
+concrt140.dll, msvcp140.dll, msvcp140_1.dll, msvcp140_2.dll,
+msvcp140_atomic_wait.dll, msvcp140_codecvt_ids.dll, vccorlib140.dll,
+vcruntime140.dll, vcruntime140_1.dll, vcruntime140_threads.dll.
+By selecting I agree, you agree to these terms for those components. If you do not
+agree, decline and do not use or redistribute those components.
+
+2. Permitted use; ownership
+You may use the bundled components only with LuckyWheel on a Microsoft Windows
+operating system. The components are licensed, not sold. Microsoft and its
+suppliers retain ownership and all rights not expressly granted. You must respect
+technical limitations and retain all copyright, trademark and patent notices.
+You may not modify the components, work around technical limitations, or reverse
+engineer, decompile, disassemble or derive their source, except to the extent
+permitted by applicable law or required by an applicable third-party open-source
+license within the Microsoft components. You may not publish benchmark results
+for Windows SDK components without Microsoft's prior written approval where the
+SDK terms require it. You may not rent, lease, lend, offer them as standalone
+software, or use them for standalone commercial software hosting. Do not use them
+in malicious, deceptive or unlawful software or imply Microsoft endorsement.
+
+3. Redistribution
+The publisher permits further distribution of the unmodified components only as
+part of the complete LuckyWheel distribution, retaining its notices, licenses,
+source delivery and acceptance mechanism. Distributors must require their
+distributors and external end users to agree to protective terms at least as
+protective of the Microsoft components as these terms and the applicable upstream
+license. The Windows SDK components are for Classic Windows applications only;
+they may not be redistributed with Universal Windows applications. No permission
+is given to distribute Debug, Preview or Unreleased Microsoft components.
+Do not impose an Excluded License on Microsoft components: one requiring their
+source disclosure/distribution or granting others rights to modify those
+components. This restriction does not apply to independently licensed Qt,
+FFmpeg, LuckyWheel or other open-source code.
+Distributors must comply with the applicable upstream Distributable Code
+requirements, including significant primary application functionality, notices,
+distribution restrictions and the obligation to indemnify, defend and hold
+harmless Microsoft against claims including attorneys' fees related to the
+distribution or use of their applications. For the Visual Studio components the
+upstream exception for claims based solely on the Distributable Code applies.
+The Windows SDK license has no such exception. These are distributor obligations;
+ordinary end users do not assume a distributor indemnity merely by running
+LuckyWheel. Bundled upstream texts: Microsoft-SDK-LICENSE.rtf (section 2(a)) and
+Microsoft-VS2026-Community-LICENSE.txt (section 8).
+
+4. Export; no warranty; liability
+Comply with all applicable domestic and international export, import and trade
+laws and restrictions on destinations, end users and end use. The Microsoft
+components are provided AS IS. Microsoft and its suppliers give no express
+warranties, guarantees or conditions and, to the extent permitted by applicable
+law, exclude implied warranties of merchantability, fitness for a particular
+purpose and non-infringement. No Microsoft support is promised. To the extent
+permitted by applicable law, recovery from Microsoft and its suppliers is limited
+to direct damages up to US $5.00; consequential damages, lost profits, special,
+indirect and incidental damages are excluded, including when advised of their
+possibility. This covers contract, warranty, strict liability, negligence and
+other claims relating to those components. Mandatory consumer and other statutory
+rights, including Australian Consumer Law guarantees, are not limited. Regional
+exceptions and applicable law remain as stated in the bundled upstream terms.
+
+5. Open-source rights remain intact
+These Microsoft-only terms do not restrict use, copying, modification or
+redistribution of LuckyWheel under MIT, or Qt / FFmpeg under their LGPL licenses,
+or any other separately licensed component. You may replace the LGPL libraries
+with compatible modified versions and reverse engineer LuckyWheel to debug those
+modifications. There is no DLL signature or hash lock. Complete Qt / FFmpeg source
+archives, build scripts, configuration and notices accompany each binary package
+in sources/LuckyWheel-2.0.8-third-party-sources.zip. See SOURCE-DELIVERY.md.
+When redistributing the whole bundle, preserve this separate licensing scope.
+
+LuckyWheel's MIT license (applies only to its own code and assets) follows:
+------------------------------------------------------------------------
+MIT License
+
+Copyright (c) 2026 kaido-MSVC
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+This license covers the LuckyWheel source code and assets created for this
+project. Third-party components shipped with LuckyWheel (Qt, FFmpeg and others)
+remain under their own licenses; see THIRD-PARTY.md and the licenses folder.

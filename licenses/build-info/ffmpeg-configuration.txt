@@ -1,0 +1,5 @@
+--prefix=/c/FFmpeg-n9.0.1/build/msvc/installed --disable-programs --disable-doc --disable-debug --enable-network --disable-lzma --enable-pic --disable-vulkan --disable-v4l2-m2m --disable-decoder=truemotion1 --disable-avdevice --disable-avfilter --enable-zlib --extra-cflags='-IC:/zlib-1.3.1/build/amd64' --extra-ldflags='-LIBPATH:C:/zlib-1.3.1/build/amd64' --toolchain=msvc --enable-shared --disable-static
+
+Extracted from all five supplied DLLs without loading them.
+No local modifications by LuckyWheel. Upstream installer recipe uses the unpatched 9.0.1 tarball.
+The historical Qt build was not reproduced. Source-SBOM correspondence and the fixed upstream unpatched FFmpeg recipe were verified; see source-verification.json and SOURCE-DELIVERY.md.
