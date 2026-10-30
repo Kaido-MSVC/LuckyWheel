@@ -23,7 +23,7 @@ Qt 與 FFmpeg 以獨立 DLL 動態連結。使用者可替換相容版本，也�
 第三方來源包必須與二進位在同一下載位置、免費且無額外登入門檻提供，並驗證所有雜湊。
 每份 Portable／Setup 均內含 `sources/LuckyWheel-2.0.8-third-party-sources.zip`，實際交付來源。
 Microsoft 元件同意流程與限定範圍見 `licenses/END-USER-TERMS.txt`、`MICROSOFT-REDIST.md`。
-本輪僅完成本機交付，尚未上傳 GitHub。
+完整二進位包與 [第三方來源 ZIP](https://github.com/Kaido-MSVC/LuckyWheel/releases/download/v2.0.8/LuckyWheel-2.0.8-third-party-sources.zip) 已於 [v2.0.8 Release](https://github.com/Kaido-MSVC/LuckyWheel/releases/tag/v2.0.8) 公開提供。
 
 九個嵌入的 qtbase_*.qm：zh_TW、zh_CN、en、ja、ko、es、fr、de、pt_BR。
 Copyright (C) The Qt Company Ltd. and other contributors.

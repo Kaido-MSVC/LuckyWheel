@@ -1,11 +1,11 @@
 # LuckyWheel v2.0.8 安裝與資料
 
-本機完整發布套件已就緒，尚未上傳 GitHub，見 RELEASE-STATUS.md。
+正式下載見 [GitHub Release v2.0.8](https://github.com/Kaido-MSVC/LuckyWheel/releases/tag/v2.0.8)，發布狀態與驗證範圍見 [RELEASE-STATUS.md](RELEASE-STATUS.md)。
 主程式及安裝包未簽章。安裝版採目前使用者安裝，不要求系統管理員權限。
 
-- 安裝：執行 `LuckyWheel-2.0.8-Windows-x64-Setup.exe`；預設程式目錄為
+- 安裝：執行 [LuckyWheel-2.0.8-Windows-x64-Setup.exe](https://github.com/Kaido-MSVC/LuckyWheel/releases/download/v2.0.8/LuckyWheel-2.0.8-Windows-x64-Setup.exe)；預設程式目錄為
   `%LOCALAPPDATA%\Programs\LuckyWheel`，開始選單捷徑固定建立，桌面捷徑可選。
-- 免安裝：完整解壓 Portable ZIP，開啟根目錄 LuckyWheel.exe。保留 DLL、外掛與授權文件。
+- 免安裝：完整解壓 [LuckyWheel-2.0.8-Windows-x64-Portable.zip](https://github.com/Kaido-MSVC/LuckyWheel/releases/download/v2.0.8/LuckyWheel-2.0.8-Windows-x64-Portable.zip)，開啟根目錄 `LuckyWheel.exe`。保留 DLL、外掛與授權文件。
 - 資料：預設 `%LOCALAPPDATA%\LuckyWheel\LuckyWheel\luckywheel.sqlite`；實際位置見設定頁。
   可用 `--data-dir` 指定隔離目錄。新捷徑不會繼承自訂參數，應自行保留。
 - 升級：先關閉程式並用程式內「備份 SQLite」，再使用原安裝目錄。安裝不覆寫資料庫。

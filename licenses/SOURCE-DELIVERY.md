@@ -1,7 +1,7 @@
 # LGPL 對應來源與建置交付（v2.0.8）
 
 每份 Portable 與 Setup 都實際內含 `sources/LuckyWheel-2.0.8-third-party-sources.zip`，
-不依賴上游網址、寄信索取或將來才建立的下載頁。相同來源 ZIP 另置於本機交付目錄供單獨取得。
+不依賴上游網址或寄信索取。相同來源 ZIP 亦可由 [v2.0.8 Release 免費下載](https://github.com/Kaido-MSVC/LuckyWheel/releases/download/v2.0.8/LuckyWheel-2.0.8-third-party-sources.zip)。
 內含下表原始壓縮檔、SHA256 清單、這份說明、建置設定及來源證據。
 完整來源網址、提交、大小、SHA256 見 source-provenance.json；請按雜湊識別，勿只看 6.12.0 名稱。
 
@@ -52,9 +52,9 @@ https://www.qt.io/development/open-source-lgpl-obligations
 並要求來源 ZIP 內的來源證據及建置資料與本機一致；驗證通過後嵌入 Portable／Setup。
 因此每次傳送任何一種完整二進位包，都同時交付完整第三方來源，不必另向作者索取。
 安裝時會把 sources/ 一併安裝；解除安裝前可複製保存。MIT 自有程式來源另附 source ZIP。
-若將來公開 GitHub Release，發布說明仍應標示 FFmpeg LGPL 與來源包的下載位置，
-上傳同一交付目錄內的 Portable、Setup、自有 source ZIP、第三方 source ZIP、SHA256 清單。
-本輪未上傳；不能宣稱已存在公開下載網址。鏡像及再散布保留整包來源與通知即可沿用交付方式。
+[GitHub Release v2.0.8](https://github.com/Kaido-MSVC/LuckyWheel/releases/tag/v2.0.8) 已標示 FFmpeg LGPL 與來源包下載位置，
+並提供 Portable、Setup、自有 source ZIP、第三方 source ZIP、SHA256 清單。
+鏡像及再散布保留整包來源與通知即可沿用交付方式。
 
 ## 對應性驗證結果及限制
 

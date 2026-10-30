@@ -1,19 +1,20 @@
 # LuckyWheel v2.0.8 — Windows x64
 
 C++17 / Qt Widgets 幸運轉盤，支援獎品庫存、歷史紀錄、CSV/JSON 與九語介面。
-本次僅修正公開前授權通知與封裝，版本維持 2.0.8。
+v2.0.8 已公開發布，包含第三方授權通知與完整來源交付。
 
-**發布狀態：Repo 與本機完整 Release 套件 GO，尚未推送 GitHub。**
-見 [RELEASE-STATUS.md](RELEASE-STATUS.md) 的持續義務與驗證範圍。此目錄沒有已建立的 GitHub Release。
+**發布狀態：原始碼已公開，正式下載見 [GitHub Release v2.0.8](https://github.com/Kaido-MSVC/LuckyWheel/releases/tag/v2.0.8)。**
+見 [RELEASE-STATUS.md](RELEASE-STATUS.md) 的持續義務與驗證範圍。
 
 ## 取得與執行
 
-- 安裝版：`LuckyWheel-2.0.8-Windows-x64-Setup.exe`。
-- 免安裝版：完整解壓 `LuckyWheel-2.0.8-Windows-x64-Portable.zip`，開啟根目錄的 `LuckyWheel.exe`。
-- 原始碼：`LuckyWheel-2.0.8-source.zip`，不含 runtime、build、packages、歷史驗證紀錄或舊網頁版。
+- 安裝版：[LuckyWheel-2.0.8-Windows-x64-Setup.exe](https://github.com/Kaido-MSVC/LuckyWheel/releases/download/v2.0.8/LuckyWheel-2.0.8-Windows-x64-Setup.exe)。
+- 免安裝版：完整解壓 [LuckyWheel-2.0.8-Windows-x64-Portable.zip](https://github.com/Kaido-MSVC/LuckyWheel/releases/download/v2.0.8/LuckyWheel-2.0.8-Windows-x64-Portable.zip)，開啟根目錄的 `LuckyWheel.exe`。
+- 原始碼：[LuckyWheel-2.0.8-source.zip](https://github.com/Kaido-MSVC/LuckyWheel/releases/download/v2.0.8/LuckyWheel-2.0.8-source.zip)，不含 runtime、build、packages、歷史驗證紀錄或舊網頁版。
 - 原始碼需自行建置：執行 `build.cmd`，完成後開啟 `build/dist/LuckyWheel.exe`；詳見 [BUILD.md](BUILD.md)。
 
-完整發布套件位於 packages/prepublish-20261030；兩項授權／來源交付修正已完成。程式與安裝包尚未簽章。
+第三方來源：[LuckyWheel-2.0.8-third-party-sources.zip](https://github.com/Kaido-MSVC/LuckyWheel/releases/download/v2.0.8/LuckyWheel-2.0.8-third-party-sources.zip)。
+檔案核對：[SHA256SUMS.txt](https://github.com/Kaido-MSVC/LuckyWheel/releases/download/v2.0.8/SHA256SUMS.txt)。程式與安裝包尚未簽章。
 安裝版和免安裝版均需保留 DLL、外掛、licenses 與發布狀態文件；不必另行安裝 Qt。
 
 資料預設位於 `%LOCALAPPDATA%/LuckyWheel/LuckyWheel/`，程式離線工作。
