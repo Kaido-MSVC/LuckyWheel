@@ -27,6 +27,27 @@ class CoreTests : public QObject {
             QVERIFY(file.open(QIODevice::WriteOnly)); QCOMPARE(file.write(pair.second), pair.second.size());
         }
     }
+    void firstRunLanguageMapping_data() {
+        QTest::addColumn<QStringList>("languages");
+        QTest::addColumn<QString>("expected");
+        const QList<QPair<QString, QString>> cases{
+            {"zh-TW", "zh_TW"}, {"zh-HK", "zh_TW"}, {"zh-MO", "zh_TW"},
+            {"zh-Hant", "zh_TW"}, {"zh-Hant-CN", "zh_TW"}, {"zh_CN", "zh_CN"},
+            {"zh-SG", "zh_CN"}, {"zh-Hans-TW", "zh_CN"}, {"zh", "zh_CN"},
+            {"en-GB", "en"}, {"ja-JP", "ja"}, {"ko-KR", "ko"},
+            {"es-MX", "es"}, {"fr-CA", "fr"}, {"de-AT", "de"},
+            {"pt-BR", "pt"}, {"pt-PT", "pt"}, {"ru-RU", "en"}, {"C", "en"}};
+        for (const auto &entry : cases)
+            QTest::newRow(qPrintable(entry.first)) << QStringList{entry.first} << entry.second;
+        QTest::newRow("preference-order") << QStringList{"fr-CA", "ja-JP"} << QString("fr");
+        QTest::newRow("supported-fallback") << QStringList{"ru-RU", "de-DE"} << QString("de");
+        QTest::newRow("empty") << QStringList{} << QString("en");
+    }
+    void firstRunLanguageMapping() {
+        QFETCH(QStringList, languages);
+        QFETCH(QString, expected);
+        QCOMPARE(languageForUiLanguages(languages), expected);
+    }
     void examplesAndColorStockRoundTrips() {
         const auto c = lw::exampleConfig();
         QString e;

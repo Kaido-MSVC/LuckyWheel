@@ -1,4 +1,4 @@
-﻿LuckyWheel v2.0.8 — Microsoft component terms / Microsoft 元件條款
+﻿LuckyWheel v2.0.9 — Microsoft component terms / Microsoft 元件條款
 Revision: 2026-10-30
 
 本條款僅針對以下 Microsoft DLL。LuckyWheel 自有程式仍採 MIT；Qt、FFmpeg
@@ -77,7 +77,7 @@ or any other separately licensed component. You may replace the LGPL libraries
 with compatible modified versions and reverse engineer LuckyWheel to debug those
 modifications. There is no DLL signature or hash lock. Complete Qt / FFmpeg source
 archives, build scripts, configuration and notices accompany each binary package
-in sources/LuckyWheel-2.0.8-third-party-sources.zip. See SOURCE-DELIVERY.md.
+in sources/LuckyWheel-2.0.9-third-party-sources.zip. See SOURCE-DELIVERY.md.
 When redistributing the whole bundle, preserve this separate licensing scope.
 
 LuckyWheel's MIT license (applies only to its own code and assets) follows:

@@ -22,6 +22,8 @@
 #include <QFileDialog>
 #include <QInputDialog>
 #include <QLabel>
+#include <QLocale>
+#include <QHeaderView>
 #include <QLineEdit>
 #include <QEnterEvent>
 #include <QHoverEvent>
@@ -35,6 +37,7 @@
 #include <QTemporaryDir>
 #include <QTimer>
 #include <QScrollArea>
+#include <QScrollBar>
 #include <QSqlQuery>
 #include <QTranslator>
 #include <QtTest>
@@ -108,6 +111,81 @@ static DialogAction confirmPreview() {
 class UiTests : public QObject {
     Q_OBJECT
   private slots:
+    void smallDesktopCanReachSettings() {
+        QTemporaryDir dir;
+        MainWindow w(dir.filePath("data.sqlite")); w.show();
+        const QSize desktop = w.screen()->availableGeometry().size() - QSize(40, 80);
+        QVERIFY(w.minimumWidth() <= desktop.width());
+        QVERIFY(w.minimumHeight() <= desktop.height());
+        w.resize(w.minimumSize());
+        w.findChild<QStackedWidget *>("pages")->setCurrentIndex(3);
+        auto *scroll = w.findChild<QScrollArea *>("pagesScroll");
+        auto *about = w.findChild<QPushButton *>("about");
+        scroll->ensureWidgetVisible(about, 0, 0); QTest::qWait(25);
+        QVERIFY(scroll->viewport()->rect().contains(QRect(about->mapTo(scroll->viewport(), QPoint()), about->size())));
+        w.findChild<QStackedWidget *>("pages")->setCurrentIndex(2);
+        QCOMPARE(scroll->verticalScrollBar()->value(), 0);
+        QCOMPARE(scroll->horizontalScrollBar()->value(), 0);
+    }
+    void firstRunSystemLanguageAndManualPersistence() {
+        QTemporaryDir dir;
+        const QString db = dir.filePath("data.sqlite");
+        const auto expected = lw::languageForUiLanguages(QLocale::system().uiLanguages());
+        qInfo() << "Windows UI preferences:" << QLocale::system().uiLanguages() << "selected:" << expected;
+        {
+            MainWindow w(db);
+            QVERIFY2(w.startupError.isEmpty(), qPrintable(w.startupError));
+            QCOMPARE(w.configuration().language, expected);
+            QCOMPARE(w.findChild<QComboBox *>("languageBox")->currentData().toString(), expected);
+        }
+        for (const auto &code : QStringList{"zh_TW", "zh_CN", "en", "ja", "ko", "es", "fr", "de", "pt"}) {
+            QJsonObject saved;
+            {
+                MainWindow w(db);
+                const auto before = lw::toJson(w.configuration());
+                auto *box = w.findChild<QComboBox *>("languageBox");
+                box->setCurrentIndex(box->findData(code));
+                saved = lw::toJson(w.configuration());
+                auto unchanged = saved; unchanged["language"] = before["language"];
+                QCOMPARE(unchanged, before);
+            }
+            MainWindow reopened(db);
+            QCOMPARE(lw::toJson(reopened.configuration()), saved);
+            QCOMPARE(reopened.configuration().language, code);
+        }
+    }
+    void literalPrizeNamesAndHistoryColumns() {
+        QTemporaryDir dir;
+        const auto db = dir.filePath("data.sqlite");
+        const QString name = "<b>Prize & gift</b>";
+        QString error;
+        {
+            lw::Store store; QVERIFY(store.open(db, &error));
+            auto cfg = lw::exampleConfig();
+            cfg.prizes = {{"html", name, lw::Scale, -1, -1, QColor("#72b8ff")}};
+            QVERIFY(store.save(cfg, &error));
+        }
+        MainWindow w(db); w.show(); w.resize(820, 620);
+        auto *summary = w.findChild<QLabel *>("probabilitySummary");
+        auto *result = w.findChild<QLabel *>("resultLabel");
+        QCOMPARE(summary->textFormat(), Qt::PlainText);
+        QVERIFY(summary->text().contains(name));
+        QCOMPARE(result->textFormat(), Qt::PlainText);
+        w.findChild<QPushButton *>("spinButton")->click();
+        QTRY_VERIFY_WITH_TIMEOUT(!w.isBusy(), 6000);
+        QVERIFY(result->text().contains(name));
+        auto *history = w.findChild<QTableWidget *>("historyTable");
+        QCOMPARE(history->item(0, 3)->text(), name);
+        w.findChild<QStackedWidget *>("pages")->setCurrentIndex(2);
+        for (int lang = 0; lang < 9; ++lang) {
+            w.findChild<QComboBox *>("languageBox")->setCurrentIndex(lang);
+            QTest::qWait(25);
+            for (int col : {0, 1, 2, 4, 5}) {
+                QCOMPARE(history->horizontalHeader()->sectionResizeMode(col), QHeaderView::ResizeToContents);
+                QVERIFY(history->columnWidth(col) >= history->fontMetrics().horizontalAdvance(history->item(0, col)->text()));
+            }
+        }
+    }
     void languageSwitchRefreshesSavedAndLastMiss() {
         QTemporaryDir dir;
         QString error;
@@ -161,6 +239,8 @@ class UiTests : public QObject {
                         for (auto name : {"addPrize", "removePrize", "savePrizes"}) {
                             auto *b = w.findChild<QPushButton *>(name);
                             QVERIFY(b->isVisible());
+                            w.findChild<QScrollArea *>("pagesScroll")->ensureWidgetVisible(b, 0, 0);
+                            QTest::qWait(5);
                             QVERIFY(w.rect().contains(QRect(b->mapTo(&w, QPoint()), b->size())));
                             QVERIFY2(b->width() >= b->minimumSizeHint().width(), qPrintable(code + ": " + name));
                         }
@@ -612,7 +692,9 @@ class UiTests : public QObject {
         }
         wheel->setRotation(0);
         for (int expanded = 1; expanded >= 0; --expanded) {
-            for (const QSize size : {QSize(820, 620), QSize(1160, 830), QSize(1600, 1000)}) {
+            for (const QSize requested : {QSize(820, 620), QSize(1160, 830), QSize(1600, 1000)}) {
+                const QSize desktop = w.screen()->availableGeometry().size() - QSize(40, 80);
+                const QSize size = requested.boundedTo(desktop).expandedTo(w.minimumSize());
                 w.resize(size);
                 QTest::qWait(60);
                 QVERIFY(w.grab().save(output + QString("/layout-%1-%2x%3.png").arg(expanded).arg(size.width()).arg(size.height())));
@@ -1054,6 +1136,9 @@ class UiTests : public QObject {
                 QTest::qWait(20);
                 for (auto *b : tabs->widget(page)->findChildren<QPushButton *>()) {
                     if (!b->isVisible()) continue;
+                    auto *pageScroll = w.findChild<QScrollArea *>("pagesScroll");
+                    pageScroll->ensureWidgetVisible(b, 0, 0);
+                    QTest::qWait(5);
                     QRect rect(b->mapTo(&w, QPoint()), b->size());
                     QVERIFY2(w.rect().contains(rect), qPrintable(b->objectName()));
                     if (b->width() < b->minimumSizeHint().width())

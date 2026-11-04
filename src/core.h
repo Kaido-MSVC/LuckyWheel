@@ -45,6 +45,8 @@ struct Record {
     quint32 weight = 0, ticket = 0;
     qint64 sequence = 0; // Display ordinal; database id remains immutable.
 };
+// First-run selection only; saved/imported configurations keep their language.
+QString languageForUiLanguages(const QStringList &languages);
 QString validate(const Config &c);
 std::optional<quint32> parsePercent(const QString &text);
 QString percent(quint32 weight);

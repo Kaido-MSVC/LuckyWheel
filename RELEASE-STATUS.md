@@ -1,24 +1,18 @@
-# LuckyWheel v2.0.8 發布狀態（2026-10-30）
+# LuckyWheel v2.0.9 發布狀態（2026-11-04）
 
-- Repo：已公開於 [Kaido-MSVC/LuckyWheel](https://github.com/Kaido-MSVC/LuckyWheel)，採 package.ps1 明確清單所產生的 source ZIP／相同檔案清單。
-- Release：[v2.0.8](https://github.com/Kaido-MSVC/LuckyWheel/releases/tag/v2.0.8) 已正式發布，包含 Portable、Setup、自有 source ZIP、第三方 source ZIP 與 SHA256 清單；已補齊 Microsoft 下游條款／接受流程及 LGPL 實體來源交付。
-- main 的文件已更新為發布後狀態；v2.0.8 tag 與既有附件保留發布時快照。
+正式下載與附件雜湊以 [GitHub Release v2.0.9](https://github.com/Kaido-MSVC/LuckyWheel/releases/tag/v2.0.9) 及其 SHA256SUMS.txt 為準。
+本版唯一應用程式來源為 Windows 本機 D:\projects\LuckyWheel\native-v2 已完成語言／UI 修正的原始碼，重新 MSVC x64 Release 建置與封裝；不沿用舊 EXE 或舊 dist。
+舊 v2.0.8 tag 與附件保留。本版包含 Portable、Setup、自有來源、第三方對應來源及 SHA256 清單。
 
-## 已解除的兩項 blocker
+## 授權與來源交付
 
-1. SDK 三個 DLL 在官方 Classic Windows app redist 清單；原始 RTF／通知隨附。
-   VS 2026 Community 第 8 節及 VC/redist 清單亦已核對；13 個 Microsoft DLL 未修改且來源雜湊一致。
-   安裝版勾選接收者條款；無聲模式需明確 /ACCEPTMS=1；兩種版本首次啟動均有同意流程。
-   條款僅針對 Microsoft DLL，不限制 Qt／FFmpeg 的 LGPL 權利。
-2. Qt 四模組來源 SBOM 與來源包逐檔核對，Git 控制檔缺項補齊；FFmpeg 與固定官方 recipe 相符。
-   每份 Portable／Setup 都實際內含第三方來源 ZIP 及建置設定，不依賴線上服務。
+自有程式碼 MIT；Qt 動態連結 LGPLv3，FFmpeg LGPLv2.1 或更新版本，Qt 翻譯 BSD-3-Clause。Portable／Setup 各自內含完整第三方來源 ZIP、建置設定與來源證據。
+DLL 必須與 licenses/source-provenance.json 中的既有來源雜湊相符。第三方庫未自行修改或升版。
+Microsoft SDK／VS 元件原始條款、接收者同意流程與散布者持續義務保留，詳見 licenses/MICROSOFT-REDIST.md。接收者按同意不能代替發布者義務。
+再散布時保留完整 sources、licenses 與接受流程；自製素材聲明仍由發布者負責。
 
-## 持續義務及界線
+## 驗證範圍
 
-發布者必須遵守 SDK／VS 散布者條款，包含 Microsoft 賠償／抗辯／免責保護義務，
-見 licenses/MICROSOFT-REDIST.md。接收者按同意不能代替發布者義務。
-正式下載以 [v2.0.8 Release](https://github.com/Kaido-MSVC/LuckyWheel/releases/tag/v2.0.8) 的五個附件及 [SHA256SUMS.txt](https://github.com/Kaido-MSVC/LuckyWheel/releases/download/v2.0.8/SHA256SUMS.txt) 為準；
-再散布時保留完整來源與通知。舊本機同版套件不屬於此次發布。
-版本維持 2.0.8，以發布附件的 SHA256 辨識內容。未簽章，未驗證乾淨 Windows 或既有安裝原地升級。
-第三方庫未作位元組相同重建；已驗證來源對應性及交付，並未聲稱重現整個上游供應鏈。
-既有素材的自製聲明仍由發布者負責。
+建置、必要測試與封裝核對結果見 RELEASE-NOTES-v2.0.9.md。
+未實測切換 Windows 語言後重新登入、混合 DPI 多螢幕、乾淨 Windows 安裝／解除安裝、既有安裝原地升級及長時間壓力測試。
+未數位簽章，未宣稱第三方函式庫可位元組相同重建。

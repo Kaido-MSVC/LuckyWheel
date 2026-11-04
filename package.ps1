@@ -119,9 +119,10 @@ if ($LASTEXITCODE) { throw 'NSIS packaging failed.' }
 Compress-Archive -Path (Join-Path $payload '*') -DestinationPath $portable
 # Source archive uses an allowlist rather than recursively collecting the workspace.
 $rootFiles = @('.gitignore','.clang-format','CMakeLists.txt','CMakePresets.json','build.cmd','package.ps1',
-    'LICENSE','README.md','BUILD.md','INSTALL.md','THIRD-PARTY.md','RELEASE-STATUS.md','RELEASE-NOTES-v2.0.8.md')
+    'LICENSE','README.md','BUILD.md','INSTALL.md','THIRD-PARTY.md','RELEASE-STATUS.md')
 $sourceFiles = @($rootFiles | ForEach-Object { Get-Item -LiteralPath (Join-Path $PSScriptRoot $_) })
 $sourceFiles += @(Get-ChildItem -LiteralPath $PSScriptRoot -Filter 'CHANGELOG-v*.md' -File)
+$sourceFiles += @(Get-ChildItem -LiteralPath $PSScriptRoot -Filter 'RELEASE-NOTES-v*.md' -File)
 foreach ($dir in @('src','tests','assets','examples','installer','licenses')) {
     $sourceFiles += @(Get-ChildItem -LiteralPath (Join-Path $PSScriptRoot $dir) -Recurse -File)
 }

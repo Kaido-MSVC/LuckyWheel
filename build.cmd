@@ -37,6 +37,11 @@ copy /y "%LW_BUILD_DIR%\LuckyWheel.exe" "%LW_BUILD_DIR%\dist\LuckyWheel.exe" >nu
 if errorlevel 1 exit /b 1
 "%LW_QT_ROOT%\bin\windeployqt.exe" --release --no-translations --no-compiler-runtime --exclude-plugins qpdf --dir "%LW_BUILD_DIR%\dist" "%LW_BUILD_DIR%\dist\LuckyWheel.exe"
 if errorlevel 1 exit /b 1
+rem Pin the licensed Windows SDK redist rather than a machine-specific system copy.
+if not defined LW_D3D_REDIST set "LW_D3D_REDIST=%ProgramFiles(x86)%\Windows Kits\10\Redist\D3D\x64\d3dcompiler_47.dll"
+if not exist "%LW_D3D_REDIST%" exit /b 2
+copy /y "%LW_D3D_REDIST%" "%LW_BUILD_DIR%\dist\d3dcompiler_47.dll" >nul
+if errorlevel 1 exit /b 1
 rem Use the existing matching redistributable DLLs; do not run a system installer.
 if not defined LW_CRT_ROOT set "LW_CRT_ROOT=%LW_VS_ROOT%\VC\Redist\MSVC\14.44.35112\x64\Microsoft.VC143.CRT"
 if not exist "%LW_CRT_ROOT%\msvcp140.dll" exit /b 2

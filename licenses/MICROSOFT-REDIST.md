@@ -32,5 +32,5 @@ Portable 及安裝後首次啟動均在開啟抽獎資料庫前要求明確同�
 SDK 2(a)(ii) 與 VS 2026 第 8 節的散布者義務仍由實際發布者承擔，
 包含對 Microsoft 的 indemnify / defend / hold harmless；VS 有單獨源於
 Distributable Code 請求的例外，SDK 無此例外。不能以接收者按同意代替發布者責任。
-[GitHub Release v2.0.8](https://github.com/Kaido-MSVC/LuckyWheel/releases/tag/v2.0.8) 已公開發布完整套件；發布者仍須履行上述持續義務。
+[GitHub Release v2.0.9](https://github.com/Kaido-MSVC/LuckyWheel/releases/tag/v2.0.9) 已公開發布完整套件；發布者仍須履行上述持續義務。
 再散布應保留完整套件、條款與通知；不得把 Microsoft DLL 重新授權為 MIT。

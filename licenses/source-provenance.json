@@ -1,7 +1,7 @@
 {
-  "date": "2026-10-30",
-  "applicationVersion": "2.0.8",
-  "distributionStatus": "GO - local release set; no upload performed",
+  "date": "2026-11-04",
+  "applicationVersion": "2.0.9",
+  "distributionStatus": "GO - v2.0.9 release set with physically embedded corresponding sources",
   "sources": [
     {
       "file": "qtmultimedia-everywhere-src-6.12.0.tar.xz",
@@ -458,7 +458,7 @@
   ],
   "limitations": [
     "Qt and FFmpeg were not rebuilt byte-for-byte; source correspondence verified using installed source SBOM, fixed commits and official FFmpeg recipe.",
-    "No GitHub push or public release has occurred. Sources are physically embedded in each binary package."
+    "Sources are physically embedded in each binary package; published attachments are identified by SHA256SUMS.txt."
   ],
   "sourceVerification": "build-info/source-verification.json"
 }

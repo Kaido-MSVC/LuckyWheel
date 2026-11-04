@@ -33,6 +33,8 @@
 #include <QPushButton>
 #include <QSaveFile>
 #include <QScrollArea>
+#include <QScrollBar>
+#include <QScreen>
 #include <QShortcut>
 #include <QSlider>
 #include <QStackedWidget>
@@ -211,8 +213,9 @@ QPushButton *MainWindow::button(const QString &key, const QString &name) {
 }
 MainWindow::MainWindow(const QString &dataPath, QWidget *parent) : QMainWindow(parent) {
     setWindowIcon(QIcon(":/icons/luckywheel.ico"));
-    resize(1160, 830);
-    setMinimumSize(820, 620);
+    const QSize desktop = screen() ? screen()->availableGeometry().size() - QSize(40, 80) : QSize(1160, 830);
+    setMinimumSize(QSize(820, 620).boundedTo(desktop));
+    resize(QSize(1160, 830).boundedTo(desktop));
     QDir().mkpath(QFileInfo(dataPath).absolutePath());
     if (!store.open(dataPath, &startupError))
         return;
@@ -259,8 +262,20 @@ MainWindow::MainWindow(const QString &dataPath, QWidget *parent) : QMainWindow(p
     root->addWidget(sidebar);
     pages = new QStackedWidget;
     pages->setObjectName("pages");
-    root->addWidget(pages, 1);
-    connect(pages, &QStackedWidget::currentChanged, this, [this] { updateSidebar(); });
+    // Keep page content usable when high DPI leaves less than 620 logical pixels
+    // of desktop height. Navigation stays visible while the page can scroll.
+    pages->setMinimumSize(560, 560);
+    auto *pagesScroll = new QScrollArea;
+    pagesScroll->setObjectName("pagesScroll");
+    pagesScroll->setFrameShape(QFrame::NoFrame);
+    pagesScroll->setWidgetResizable(true);
+    pagesScroll->setWidget(pages);
+    root->addWidget(pagesScroll, 1);
+    connect(pages, &QStackedWidget::currentChanged, this, [this, pagesScroll] {
+        updateSidebar();
+        pagesScroll->verticalScrollBar()->setValue(0);
+        pagesScroll->horizontalScrollBar()->setValue(0);
+    });
     connect(sidebarToggle, &QToolButton::clicked, this, [this] {
         sidebarExpanded = !sidebarExpanded;
         uiSettings->setValue("sidebarExpanded", sidebarExpanded);
@@ -276,6 +291,7 @@ MainWindow::MainWindow(const QString &dataPath, QWidget *parent) : QMainWindow(p
     content->addWidget(wheel, 3);
     auto *side = new QVBoxLayout;
     resultLabel = new QLabel;
+    resultLabel->setTextFormat(Qt::PlainText);
     resultLabel->setObjectName("resultLabel");
     resultLabel->setWordWrap(true);
     resultLabel->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Preferred);
@@ -285,6 +301,7 @@ MainWindow::MainWindow(const QString &dataPath, QWidget *parent) : QMainWindow(p
     side->addStretch();
     side->addWidget(resultLabel);
     summaryLabel = new QLabel;
+    summaryLabel->setTextFormat(Qt::PlainText);
     summaryLabel->setObjectName("probabilitySummary");
     summaryLabel->setWordWrap(true);
     summaryLabel->setTextInteractionFlags(Qt::TextSelectableByMouse);
@@ -432,7 +449,9 @@ MainWindow::MainWindow(const QString &dataPath, QWidget *parent) : QMainWindow(p
     historyTable = new QTableWidget(0, 6);
     historyTable->setObjectName("historyTable");
     historyTable->setEditTriggers(QAbstractItemView::NoEditTriggers);
-    historyTable->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    historyTable->horizontalHeader()->setMinimumSectionSize(90);
+    historyTable->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
+    historyTable->horizontalHeader()->setSectionResizeMode(3, QHeaderView::Stretch);
     historyLayout->addWidget(historyTable);
     auto *exportCsv = button("exportCsv", "exportHistory");
     auto *stats = button("statistics", "statistics");
@@ -481,6 +500,7 @@ MainWindow::MainWindow(const QString &dataPath, QWidget *parent) : QMainWindow(p
     connect(aboutBtn, &QPushButton::clicked, this, &MainWindow::about);
     mutators << restoreBtn;
     dataLabel = new QLabel;
+    dataLabel->setTextFormat(Qt::PlainText);
     dataLabel->setWordWrap(true);
     dataLabel->setTextInteractionFlags(Qt::TextSelectableByMouse);
     settingsLayout->addWidget(dataLabel);
@@ -823,12 +843,14 @@ void MainWindow::error(const QString &e) {
     QMessageBox box(QMessageBox::Warning, t("error"), message, QMessageBox::NoButton, this);
     statusBar()->showMessage(t("error"), 10000);
     box.setObjectName("operationErrorDialog");
+    box.setTextFormat(Qt::PlainText);
     if (message != e) box.setDetailedText(e);
     box.addButton(t("confirm"), QMessageBox::AcceptRole);
     box.exec();
 }
 bool MainWindow::confirm(const QString &message) {
     QMessageBox box(QMessageBox::Question, t("confirm"), message, QMessageBox::NoButton, this);
+    box.setTextFormat(Qt::PlainText);
     auto *yes = box.addButton(t("confirm"), QMessageBox::AcceptRole);
     auto *no = box.addButton(t("cancel"), QMessageBox::RejectRole);
     box.setDefaultButton(no);
@@ -1384,7 +1406,7 @@ void MainWindow::about() {
     text.setPlainText(t("aboutLicense") + "\n\n" + t("thirdParty") + "\n" + components + "\n\n" + t("licenseText") +
                       "\n" + license + "\n\n" + translationNotice +
                       "\n\nLGPL corresponding source and rebuild information: licenses/SOURCE-DELIVERY.md\n"
-                      "Publication status: RELEASE-STATUS.md (binary release candidate; not cleared for redistribution).");
+                      "Publication and redistribution information: RELEASE-STATUS.md.");
     layout.addWidget(&text, 1);
     QDialogButtonBox actions;
     auto *folder = actions.addButton(t("openLicenses"), QDialogButtonBox::ActionRole);

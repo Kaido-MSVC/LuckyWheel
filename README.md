@@ -1,20 +1,20 @@
-# LuckyWheel v2.0.8 — Windows x64
+# LuckyWheel v2.0.9 — Windows x64
 
 C++17 / Qt Widgets 幸運轉盤，支援獎品庫存、歷史紀錄、CSV/JSON 與九語介面。
-v2.0.8 已公開發布，包含第三方授權通知與完整來源交付。
+v2.0.9 修正首次啟動語言選擇及高 DPI／捲動／文字顯示，包含第三方授權通知與完整來源交付。
 
-**發布狀態：原始碼已公開，正式下載見 [GitHub Release v2.0.8](https://github.com/Kaido-MSVC/LuckyWheel/releases/tag/v2.0.8)。**
+**發布狀態：原始碼已公開，正式下載見 [GitHub Release v2.0.9](https://github.com/Kaido-MSVC/LuckyWheel/releases/tag/v2.0.9)。**
 見 [RELEASE-STATUS.md](RELEASE-STATUS.md) 的持續義務與驗證範圍。
 
 ## 取得與執行
 
-- 安裝版：[LuckyWheel-2.0.8-Windows-x64-Setup.exe](https://github.com/Kaido-MSVC/LuckyWheel/releases/download/v2.0.8/LuckyWheel-2.0.8-Windows-x64-Setup.exe)。
-- 免安裝版：完整解壓 [LuckyWheel-2.0.8-Windows-x64-Portable.zip](https://github.com/Kaido-MSVC/LuckyWheel/releases/download/v2.0.8/LuckyWheel-2.0.8-Windows-x64-Portable.zip)，開啟根目錄的 `LuckyWheel.exe`。
-- 原始碼：[LuckyWheel-2.0.8-source.zip](https://github.com/Kaido-MSVC/LuckyWheel/releases/download/v2.0.8/LuckyWheel-2.0.8-source.zip)，不含 runtime、build、packages、歷史驗證紀錄或舊網頁版。
+- 安裝版：[LuckyWheel-2.0.9-Windows-x64-Setup.exe](https://github.com/Kaido-MSVC/LuckyWheel/releases/download/v2.0.9/LuckyWheel-2.0.9-Windows-x64-Setup.exe)。
+- 免安裝版：完整解壓 [LuckyWheel-2.0.9-Windows-x64-Portable.zip](https://github.com/Kaido-MSVC/LuckyWheel/releases/download/v2.0.9/LuckyWheel-2.0.9-Windows-x64-Portable.zip)，開啟根目錄的 `LuckyWheel.exe`。
+- 原始碼：[LuckyWheel-2.0.9-source.zip](https://github.com/Kaido-MSVC/LuckyWheel/releases/download/v2.0.9/LuckyWheel-2.0.9-source.zip)，不含 runtime、build、packages、歷史驗證紀錄或舊網頁版。
 - 原始碼需自行建置：執行 `build.cmd`，完成後開啟 `build/dist/LuckyWheel.exe`；詳見 [BUILD.md](BUILD.md)。
 
-第三方來源：[LuckyWheel-2.0.8-third-party-sources.zip](https://github.com/Kaido-MSVC/LuckyWheel/releases/download/v2.0.8/LuckyWheel-2.0.8-third-party-sources.zip)。
-檔案核對：[SHA256SUMS.txt](https://github.com/Kaido-MSVC/LuckyWheel/releases/download/v2.0.8/SHA256SUMS.txt)。程式與安裝包尚未簽章。
+第三方來源：[LuckyWheel-2.0.9-third-party-sources.zip](https://github.com/Kaido-MSVC/LuckyWheel/releases/download/v2.0.9/LuckyWheel-2.0.9-third-party-sources.zip)。
+檔案核對：[SHA256SUMS.txt](https://github.com/Kaido-MSVC/LuckyWheel/releases/download/v2.0.9/SHA256SUMS.txt)。程式與安裝包尚未簽章。
 安裝版和免安裝版均需保留 DLL、外掛、licenses 與發布狀態文件；不必另行安裝 Qt。
 
 資料預設位於 `%LOCALAPPDATA%/LuckyWheel/LuckyWheel/`，程式離線工作。
@@ -33,7 +33,7 @@ v2.0.8 已公開發布，包含第三方授權通知與完整來源交付。
 - 保存／重載配置、匯出／載入 JSON、重置數量並建立新一輪；歷史保留。
 - 歷史依時間與流水號由新到舊排列。顯示本機時間，CSV 使用 UTC 時間。紀錄保存抽獎當時的有效機率與隨機值。
 - 中獎與未中獎音效、音量／靜音，中獎彩紙效果。
-- 九語：繁中、簡中、英、日、韓、西班牙、法、德、葡萄牙。
+- 九語：繁中、簡中、英、日、韓、西班牙、法、德、葡萄牙。首次啟動依 Windows 介面語言偏好選擇支援語言，無支援時回退英文；手動選擇會保存並優先沿用，既有配置不被系統語言覆蓋。
 - CSV 批次匯入與確認前預覽、歷史 CSV 匯出、JSON 配置檔。
 - 一致性資料庫備份、還原前自動安全備份、明亮／深色外觀。
 - 全螢幕按 F11，Esc 離開全螢幕。檔案或確認對話框開啟時，Esc 會先取消該對話框。
@@ -82,7 +82,7 @@ CSV 歷史匯出使用 UTF-8 BOM；可能被試算表視為公式的欄位會加
 
 ## 授權與公開範圍
 
-自有原始碼及自製音效採 MIT，Copyright (c) 2026 Kaido-MSVC，見 [LICENSE](LICENSE)。
+自有原始碼及自製音效採 MIT，Copyright (c) 2026 kaido-MSVC，見 [LICENSE](LICENSE)。
 Qt、FFmpeg、翻譯檔及其他第三方元件各自適用其授權，見 [THIRD-PARTY.md](THIRD-PARTY.md)。
 「設定與工具 → 關於與授權」提供 MIT、Qt LGPL 與翻譯 BSD 完整聲明，以及授權資料夾入口。
 LGPL 函式庫可替換成相容版本；允許為修改函式庫而進行除錯與逆向工程。

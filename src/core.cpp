@@ -3,6 +3,7 @@
 #include <QFile>
 #include <QJsonArray>
 #include <QJsonDocument>
+#include <QLocale>
 #include <QRandomGenerator>
 #include <QRegularExpression>
 #include <QSet>
@@ -14,6 +15,19 @@
 #include <climits>
 
 namespace lw {
+QString languageForUiLanguages(const QStringList &languages) {
+    const QStringList supported{"en", "ja", "ko", "es", "fr", "de", "pt"};
+    for (QString tag : languages) {
+        tag.replace('_', '-');
+        const QString language = tag.section('-', 0, 0).toLower();
+        if (language == "zh") {
+            const QLocale locale(tag);
+            return locale.script() == QLocale::TraditionalHanScript ? "zh_TW" : "zh_CN";
+        }
+        if (supported.contains(language)) return language;
+    }
+    return "en";
+}
 QString validate(const Config &c) {
     if (c.prizes.isEmpty() || c.prizes.size() > 200)
         return "prize_count";
@@ -347,8 +361,13 @@ Config Store::load(QString *error) const {
             *error = q.lastError().text();
         return {};
     }
-    if (!q.next())
-        return {};
+    if (!q.next()) {
+        Config initial;
+        // system().uiLanguages() follows Windows UI preferences, not regional formats
+        // or an application-wide QLocale::setDefault() override.
+        initial.language = languageForUiLanguages(QLocale::system().uiLanguages());
+        return initial;
+    }
     QJsonParseError parse;
     auto doc = QJsonDocument::fromJson(q.value(0).toString().toUtf8(), &parse);
     if (parse.error != QJsonParseError::NoError || !doc.isObject()) {

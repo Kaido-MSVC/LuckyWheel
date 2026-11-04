@@ -1,4 +1,4 @@
-# LuckyWheel v2.0.8 建置與封裝
+# LuckyWheel v2.0.9 建置與封裝
 
 ## 本機確認的工具
 
@@ -54,7 +54,7 @@ SDK、CRT 採既有可轉散布來源，不執行系統執行階段安裝器。
 第三方來源 ZIP 必須事先存在 OutputDir，且內容、metadata、build-info 通過打包檢查；
 隨後實際嵌入 Portable／Setup 的 sources/。它不放進自有 source ZIP。
 
-已發布的套件與對應來源見 [GitHub Release v2.0.8](https://github.com/Kaido-MSVC/LuckyWheel/releases/tag/v2.0.8)。
+已發布的套件與對應來源見 [GitHub Release v2.0.9](https://github.com/Kaido-MSVC/LuckyWheel/releases/tag/v2.0.9)。
 上方 OutputDir 是本機封裝輸出路徑範例；一般使用者請直接下載 Release 附件。
 需要更新同名交付時才明確加 -Refresh；只更新本版指定輸出，不建立新的副本目錄。
 發布前檢查 RELEASE-STATUS.md，不得僅因編譯／封裝成功即宣稱授權合規。
