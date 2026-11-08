@@ -1,5 +1,16 @@
 # LuckyWheel v2.0.9 — Windows x64
 
+## English overview
+
+**LuckyWheel v2.0.9** is an offline Windows x64 prize-drawing wheel built with C++17 and Qt Widgets. It supports configurable prizes and probabilities, inventory limits, drawing history, CSV import/export, JSON configurations, persistent SQLite storage, backups and restoration, sound effects, confetti, light/dark themes, and a separate probability simulator. Each outcome is selected and recorded before the wheel animation displays it.
+
+The interface supports **nine languages**: Traditional Chinese, Simplified Chinese, English, Japanese, Korean, Spanish, French, German, and Portuguese. On first launch it follows supported Windows display-language preferences, falling back to English. Manual language selections are saved across restarts.
+
+When a prize runs out, its probability becomes part of the no-prize outcome; the probabilities of other prizes do not increase. The settings password lock helps prevent accidental changes but **does not encrypt the local database**.
+
+Download the [v2.0.9 installer or portable ZIP](https://github.com/Kaido-MSVC/LuckyWheel/releases/tag/v2.0.9). Extract the complete package and retain bundled libraries, license notices and distribution files. The program works offline. The project's own code is MIT-licensed; third-party components retain separate terms, including Microsoft component terms presented for acceptance on first launch. See the Chinese documentation below for the complete drawing rules and limitations.
+
+
 C++17 / Qt Widgets 幸運轉盤，支援獎品庫存、歷史紀錄、CSV/JSON 與九語介面。
 v2.0.9 修正首次啟動語言選擇及高 DPI／捲動／文字顯示，包含第三方授權通知與完整來源交付。
 
