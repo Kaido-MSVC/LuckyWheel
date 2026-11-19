@@ -1,6 +1,6 @@
 # LuckyWheel v2.0.9
 
-2026-11-04 的語言與 UI 修正版，以 Windows 本機 D:\projects\LuckyWheel\native-v2 已修正原始碼作為唯一應用程式來源，重新完整 MSVC x64 Release 建置。舊 v2.0.8 tag／附件保留。
+2026-11-04 的語言與 UI 修正版。建置來源可從 [v2.0.9 Tag](https://github.com/Kaido-MSVC/LuckyWheel/tree/v2.0.9) 或 [應用程式來源 ZIP](https://github.com/Kaido-MSVC/LuckyWheel/releases/download/v2.0.9/LuckyWheel-2.0.9-source.zip) 取得。本版由 MSVC x64 Release 重新建置。舊 v2.0.8 tag／附件保留。
 
 ## 修正
 

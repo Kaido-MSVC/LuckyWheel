@@ -100,6 +100,17 @@ LGPL 函式庫可替換成相容版本；允許為修改函式庫而進行除錯
 
 `package.ps1` 以明確清單建立 source ZIP，排除本機資料、建置與舊驗證紀錄。
 `.gitignore` 只影響未追蹤檔案；不要直接把整個資料夾上傳。
-歷版行為保留於 `CHANGELOG-v*.md`，舊測試紀錄仍留在本機，未納入 source ZIP。
+舊測試紀錄仍留在本機，未納入 source ZIP。
 
 Microsoft 元件條款限於指定 DLL；首次啟動需明確同意。每份 Portable／Setup 均內含 Qt／FFmpeg 完整來源 ZIP，見 licenses/SOURCE-DELIVERY.md。
+
+## 版本變更紀錄
+
+- [v2.0.9](CHANGELOG-v2.0.9.md)
+- [v2.0.8](CHANGELOG-v2.0.8.md)
+- [v2.0.7](CHANGELOG-v2.0.7.md)
+- [v2.0.6](CHANGELOG-v2.0.6.md)
+- [v2.0.5](CHANGELOG-v2.0.5.md)
+- [v2.0.4](CHANGELOG-v2.0.4.md)
+- [v2.0.2](CHANGELOG-v2.0.2.md)
+- [v2.0.1](CHANGELOG-v2.0.1.md)

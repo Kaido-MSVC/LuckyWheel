@@ -1,7 +1,7 @@
 # LuckyWheel v2.0.9 發布狀態（2026-11-04）
 
 正式下載與附件雜湊以 [GitHub Release v2.0.9](https://github.com/Kaido-MSVC/LuckyWheel/releases/tag/v2.0.9) 及其 SHA256SUMS.txt 為準。
-本版唯一應用程式來源為 Windows 本機 D:\projects\LuckyWheel\native-v2 已完成語言／UI 修正的原始碼，重新 MSVC x64 Release 建置與封裝；不沿用舊 EXE 或舊 dist。
+本版應用程式的語言與介面修正可在 [v2.0.9 Tag](https://github.com/Kaido-MSVC/LuckyWheel/tree/v2.0.9) 查閱，建置用的應用程式原始碼見 [來源 ZIP](https://github.com/Kaido-MSVC/LuckyWheel/releases/download/v2.0.9/LuckyWheel-2.0.9-source.zip)。本版由 MSVC x64 Release 重新建置與封裝。
 舊 v2.0.8 tag 與附件保留。本版包含 Portable、Setup、自有來源、第三方對應來源及 SHA256 清單。
 
 ## 授權與來源交付
