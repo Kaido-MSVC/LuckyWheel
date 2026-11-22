@@ -254,7 +254,7 @@ QString encodeCsv(const QVector<QStringList> &rows, bool safe) {
     }
     return out;
 }
-std::optional<QVector<QStringList>> decodeCsv(const QString &text, QString *error) {
+std::expected<QVector<QStringList>, QString> decodeCsv(const QString &text) {
     QVector<QStringList> rows;
     QStringList row;
     QString field;
@@ -263,10 +263,10 @@ std::optional<QVector<QStringList>> decodeCsv(const QString &text, QString *erro
     QString input = text;
     if (input.startsWith(QChar(0xfeff)))
         input.remove(0, 1);
-    auto fail = [&]() -> std::optional<QVector<QStringList>> {
-        if (error)
-            *error = QString("CSV line %1 / column %2: invalid_csv").arg(input.left(cursor).count('\n') + 1).arg(row.size() + 1);
-        return std::nullopt;
+    auto fail = [&] {
+        return std::unexpected(QString("CSV line %1 / column %2: invalid_csv")
+                                   .arg(input.left(cursor).count('\n') + 1)
+                                   .arg(row.size() + 1));
     };
     for (int i = 0; i < input.size(); ++i) {
         cursor = i;

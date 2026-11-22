@@ -10,7 +10,7 @@ LuckyWheel 動態連結本機安裝的 Qt 6.12.0（MSVC 2022 x64），未自行�
 | `avcodec-63.dll`、`avformat-63.dll`、`avutil-61.dll`、`swresample-7.dll`、`swscale-10.dll` | FFmpeg 9.0.1（Qt 預先編譯版，不含 GPL 元件） | GNU LGPL v2.1 或更新版本 | `LGPL-2.1.txt`、`THIRD-PARTY-NOTICES.txt` |
 | `opengl32sw.dll` | Mesa llvmpipe（Qt 提供的軟體 OpenGL） | MIT 等 | `THIRD-PARTY-NOTICES.txt` |
 | `d3dcompiler_47.dll`、`dxcompiler.dll`、`dxil.dll` | Microsoft Direct3D／DirectX Shader Compiler（Windows SDK 可轉散布檔案，由 windeployqt 複製） | Microsoft Windows SDK 授權條款及限定元件接收者條款 | `Microsoft-SDK-LICENSE.rtf`、`Microsoft-SDK-THIRD-PARTY-NOTICES.rtf`、`MICROSOFT-REDIST.md` |
-| `msvcp140*.dll`、`vcruntime140*.dll`、`concrt140.dll`、`vccorlib140.dll` | Microsoft Visual C++ 2015–2022 執行階段（MSVC 14.44 可轉散布檔案） | Microsoft Visual Studio 授權條款中的可轉散布程式碼 | `MICROSOFT-REDIST.md` |
+| `msvcp140*.dll`、`vcruntime140*.dll`、`concrt140.dll`、`vccorlib140.dll` | Microsoft Visual C++ 執行階段（C++23 本機建置用 MSVC 14.52，已發布 v2.0.9 用 MSVC 14.44） | Microsoft Visual Studio 授權條款中的可轉散布程式碼 | `MICROSOFT-REDIST.md` |
 | SQLite | 由 Qt 的 `qsqlite` 外掛內建 | 公有領域 | `THIRD-PARTY-NOTICES.txt` |
 
 ## LGPL 與對應原始碼

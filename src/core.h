@@ -5,6 +5,7 @@
 #include <QSqlDatabase>
 #include <QStringList>
 #include <QVector>
+#include <expected>
 #include <optional>
 
 namespace lw {
@@ -59,7 +60,7 @@ QVector<qint64> simulateCounts(const Config &c, int count);
 QJsonObject toJson(const Config &c);
 std::optional<Config> fromJson(const QJsonObject &obj, QString *error);
 QString encodeCsv(const QVector<QStringList> &rows, bool safeExport = false);
-std::optional<QVector<QStringList>> decodeCsv(const QString &text, QString *error);
+[[nodiscard]] std::expected<QVector<QStringList>, QString> decodeCsv(const QString &text);
 QString passwordHash(const QString &salt, const QString &password);
 class Store {
   public:

@@ -20,14 +20,12 @@ QString prizeCsv(const Config &c) {
                             QString::number(p.remaining)};
     return encodeCsv(rows);
 }
-std::optional<Config> importPrizeCsv(const QString &text, const Config &base, QString *error) {
-    auto fail = [&](const QString &where, const QString &reason) -> std::optional<Config> {
-        if (error) *error = where + ": " + reason;
-        return std::nullopt;
+std::expected<Config, QString> importPrizeCsv(const QString &text, const Config &base) {
+    auto fail = [](const QString &where, const QString &reason) {
+        return std::unexpected(where + ": " + reason);
     };
-    QString e;
-    auto rows = decodeCsv(text, &e);
-    if (!rows) return fail("CSV", e);
+    const auto rows = decodeCsv(text);
+    if (!rows) return fail("CSV", rows.error());
     const QStringList legacy{"name", "probability", "limit", "color"};
     QStringList extended = legacy; extended << "remaining";
     if (rows->size() < 2 || (rows->first() != legacy && rows->first() != extended))
@@ -61,12 +59,12 @@ std::optional<Config> importPrizeCsv(const QString &text, const Config &base, QS
             return fail(where + " / name", "invalid_name");
         c.prizes << Prize{QUuid::createUuid().toString(QUuid::WithoutBraces), name, *weight,
                           limit, remaining, QColor(row[3].trimmed())};
-        e = validate(c);
-        if (!e.isEmpty()) return fail(where + (e == "probability_over_100" ? " / probability total" : " / prizes"), e);
+        const QString issue = validate(c);
+        if (!issue.isEmpty())
+            return fail(where + (issue == "probability_over_100" ? " / probability total" : " / prizes"), issue);
     }
-    e = validate(c);
-    if (!e.isEmpty()) return fail("CSV / prizes", e);
-    if (error) error->clear();
+    const QString issue = validate(c);
+    if (!issue.isEmpty()) return fail("CSV / prizes", issue);
     return c;
 }
 QString formatHelp(bool json) {

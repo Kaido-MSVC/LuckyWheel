@@ -51,8 +51,8 @@ class CoreTests : public QObject {
     void examplesAndColorStockRoundTrips() {
         const auto c = lw::exampleConfig();
         QString e;
-        auto csv = lw::importPrizeCsv(lw::prizeCsv(c), c, &e);
-        QVERIFY2(csv, qPrintable(e));
+        auto csv = lw::importPrizeCsv(lw::prizeCsv(c), c);
+        QVERIFY(csv);
         auto json = lw::fromJson(lw::toJson(c), &e);
         QVERIFY2(json, qPrintable(e));
         QCOMPARE(lw::toJson(*json), lw::toJson(c));
@@ -65,11 +65,11 @@ class CoreTests : public QObject {
         auto consumed = c;
         consumed.prizes[0].remaining = 0;
         consumed.prizes[0].color = QColor("#123abc");
-        csv = lw::importPrizeCsv(lw::prizeCsv(consumed), c, &e);
+        csv = lw::importPrizeCsv(lw::prizeCsv(consumed), c);
         QVERIFY(csv);
         QCOMPARE(csv->prizes[0].remaining, 0);
         QCOMPARE(csv->prizes[0].color.name(), QString("#123abc"));
-        auto legacy = lw::importPrizeCsv("name,probability,limit,color\nLegacy,10,2,#abcdef\n", c, &e);
+        auto legacy = lw::importPrizeCsv("name,probability,limit,color\nLegacy,10,2,#abcdef\n", c);
         QVERIFY(legacy);
         QCOMPARE(legacy->prizes[0].remaining, 2);
     }
@@ -81,12 +81,14 @@ class CoreTests : public QObject {
             {"X,101,2,#abcdef", "probability"}, {"X,10,-2,#abcdef", "limit"},
             {"X,10,2,red", "color"}, {"X,10,2,#abcdef,3", "remaining"}}) {
             const bool extra = pair.second == "remaining";
-            QVERIFY(!lw::importPrizeCsv(QString("name,probability,limit,color") + (extra ? ",remaining" : "") + "\n" + pair.first + "\n", c, &e));
-            QVERIFY(e.contains("line 2"));
-            QVERIFY(e.contains(pair.second));
+            const QString header = extra ? "name,probability,limit,color,remaining" : "name,probability,limit,color";
+            const auto invalid = lw::importPrizeCsv(header + "\n" + pair.first + "\n", c);
+            QVERIFY(!invalid);
+            QVERIFY(invalid.error().startsWith("CSV line 2 / " + pair.second + ": "));
         }
-        QVERIFY(!lw::importPrizeCsv("name,probability,limit,color\n\"bad\"oops,1,2,#abcdef\n", c, &e));
-        QVERIFY(e.contains("line 2"));
+        const auto malformed = lw::importPrizeCsv("name,probability,limit,color\n\"bad\"oops,1,2,#abcdef\n", c);
+        QVERIFY(!malformed);
+        QCOMPARE(malformed.error(), QString("CSV: CSV line 2 / column 1: invalid_csv"));
         auto obj = before; obj["sound"] = "false";
         QVERIFY(!lw::fromJson(obj, &e)); QVERIFY(e.contains("sound"));
         obj = before; obj["schema"] = 1.5;
@@ -280,14 +282,17 @@ class CoreTests : public QObject {
         QVERIFY(!fromJson(obj, &e));
     }
     void csv() {
-        QString e;
         QVector<QStringList> rows{{"name", "probability", "limit", "color"},
                                   {"A,\"B\"", "10.0001", "3", "#abcdef"}};
-        auto parsed = decodeCsv(encodeCsv(rows), &e);
+        auto parsed = decodeCsv(encodeCsv(rows));
         QVERIFY(parsed);
         QCOMPARE(*parsed, rows);
-        QVERIFY(!decodeCsv("\"broken", &e));
-        QVERIFY(!decodeCsv("\"a\"x", &e));
+        const auto unclosed = decodeCsv("first,\"broken");
+        QVERIFY(!unclosed);
+        QCOMPARE(unclosed.error(), QString("CSV line 1 / column 2: invalid_csv"));
+        const auto trailing = decodeCsv("\"a\"x");
+        QVERIFY(!trailing);
+        QCOMPARE(trailing.error(), QString("CSV line 1 / column 1: invalid_csv"));
         auto safe = encodeCsv({{"=CMD()", "+test", "normal"}}, true);
         QVERIFY(safe.contains("'=CMD()"));
         QVERIFY(safe.contains("'+test"));

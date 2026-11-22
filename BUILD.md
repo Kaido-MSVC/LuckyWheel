@@ -1,23 +1,25 @@
-# LuckyWheel v2.0.9 建置與封裝
+# LuckyWheel 建置與封裝
 
 ## 本機確認的工具
 
-C++17、Qt Widgets 6.12.0（MSVC x64 kit）、Visual Studio Community 2026、
-MSVC 14.44.35207（cl 19.44.35229）、CMake 4.4.4、Ninja 1.12.1、NSIS 3.13、Windows SDK 10.0.28000.0。
-Qt 上游 DLL 的編譯器為 19.44.35227，詳見 SBOM；不是本程式的 cl 版本。
-必要 Qt 元件：Core、Gui、Widgets、Sql、Multimedia、Test。
+目前原始碼的建置標準為 C++23。本機使用 Qt Widgets 6.12.0（MSVC x64 kit）、Visual Studio Community 2026、
+MSVC 14.52.37025（`cl` 19.52.37029）、CMake 4.5.0、Ninja 1.12.1、Windows SDK 10.0.28000.0。
+CMake 最低版本為 4.5，MSVC 最低版本為 19.52.37029，使用 `/std:c++23`。
+Qt 上游 DLL 仍由 MSVC 19.44.35227 建置。必要 Qt 元件為 Core、Gui、Widgets、Sql、Multimedia、Test。
+封裝另需 NSIS。
 
 ## 建置與測試
 
-在原始碼根目錄執行 `build.cmd`。腳本選擇已安裝的 VS、MSVC 14.44、Qt 6.12.0，
-以 CMake/Ninja 建立 Release，執行核心與 UI 的 CTest，通過後才部署 `build/dist/`。
+在原始碼根目錄執行 `build.cmd`。腳本選擇已安裝的 VS、MSVC 14.52、Qt 6.12.0，
+以 CMake／Ninja 建立 Release，通過核心、UI 與元件條款測試後部署至 `build-cpp23/dist/`。
+執行階段 DLL 取自工具集選擇的 x64 `Microsoft.VC145.CRT` 目錄。
 不安裝、升級或修復任何工具；缺少工具即停止。
 
 預設 Qt 位於 `D:\Qt\6.12.0\msvc2022_64`，可用 `LW_QT_ROOT`、`LW_NINJA`、
 `LW_BUILD_DIR`、`LW_CRT_ROOT` 覆寫。建置目錄不要使用磁碟根目錄、原始碼目錄或資料目錄。
-CMake cache 綁定原始碼位置，移動來源後應另選新的建置目錄。
+CMake 快取會記錄原始碼位置及編譯器。預設使用 `build-cpp23/`。若更換工具集或調整原始碼位置，請選用新的建置目錄。
 
-如需直接使用 CMake，先載入 x64 MSVC 14.44 開發環境，並將 Qt bin 加入 PATH：
+如需直接使用 CMake，先載入 x64 MSVC 14.52 開發環境，並將 Qt `bin` 加入 `PATH`。
 
 ```bat
 cmake --preset msvc-release
@@ -29,10 +31,16 @@ CTest 的 UI 使用 offscreen。原生 Windows 回歸可執行：
 
 ```bat
 set QT_QPA_PLATFORM=windows
-build\ui_tests.exe -o build\ui-native-results.txt,txt
+build-cpp23\ui_tests.exe -o build-cpp23\ui-native-results.txt,txt
 ```
 
 測試使用暫存資料庫，不使用正式資料。設定 `LW_SCREENSHOT_DIR` 可輸出 UI 截圖。
+
+## C++23 特性評估
+
+- CSV 解析與獎品匯入採用 `std::expected`，成功時回傳資料，失敗時直接回傳既有的行號及欄位錯誤。匯入仍須經預覽與確認才會儲存。
+- `std::views::enumerate` 可提供序號，但 CSV 錯誤定位須按實際換行計算，含引號的欄位可能跨行。保留現有行號計算。
+- C++23 的 `std::print` 與 C++20 的 `std::format` 對目前的 Qt 圖形介面、多語字串及 `QString` 資料流沒有直接效益。C++ Modules 涉及 Qt 產生的程式碼與建置方式，目前原始碼沿用標頭檔。
 
 ## 封裝與來源交付
 
@@ -44,7 +52,7 @@ build\ui_tests.exe -o build\ui-native-results.txt,txt
 
 產生 Portable ZIP、NSIS Setup、source ZIP 與 `SHA256SUMS.txt`。
 來源清單為 src、tests、assets、examples、installer、licenses 與必要根目錄文件；
-不把 runtime、packages、build、legacy、validation、舊報告、私人資料塞進 source ZIP。
+source ZIP 排除建置目錄、部署副本、packages、legacy、validation、舊報告及私人資料。
 `-OutputDir` 可選其他輸出位置；既有同名輸出會拒絕覆寫，避免破壞前次交付。
 預設沒有 `-Candidate` 時，若 RELEASE-STATUS.md 仍含 NO-GO 則停止。
 `-Validation` 沿用原本獨立登錄與捷徑的安裝驗證模式，不影響正式安裝登錄。
@@ -54,7 +62,8 @@ SDK、CRT 採既有可轉散布來源，不執行系統執行階段安裝器。
 第三方來源 ZIP 必須事先存在 OutputDir，且內容、metadata、build-info 通過打包檢查；
 隨後實際嵌入 Portable／Setup 的 sources/。它不放進自有 source ZIP。
 
-已發布的套件與對應來源見 [GitHub Release v2.0.9](https://github.com/Kaido-MSVC/LuckyWheel/releases/tag/v2.0.9)。
+已發布的 C++17 套件與對應來源見 [GitHub Release v2.0.9](https://github.com/Kaido-MSVC/LuckyWheel/releases/tag/v2.0.9)。
+目前的 C++23 建置供本機驗證。正式封裝需以本次部署檔案核對來源紀錄，並更新對應來源 ZIP 內的中繼資料。
 上方 OutputDir 是本機封裝輸出路徑範例；一般使用者請直接下載 Release 附件。
 需要更新同名交付時才明確加 -Refresh；只更新本版指定輸出，不建立新的副本目錄。
 發布前檢查 RELEASE-STATUS.md，不得僅因編譯／封裝成功即宣稱授權合規。

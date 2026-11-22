@@ -973,10 +973,9 @@ void MainWindow::importCsv() {
     QFile file(path);
     if (!file.open(QIODevice::ReadOnly)) { error(t("fileFailed") + "\n" + path + "\n" + file.errorString()); return; }
     if (file.size() > 2 * 1024 * 1024) { error("fileTooLarge"); return; }
-    QString e;
-    auto parsed = lw::importPrizeCsv(QString::fromUtf8(file.readAll()), cfg, &e);
-    if (!parsed) { error(e); return; }
-    const auto c = *parsed;
+    const auto parsed = lw::importPrizeCsv(QString::fromUtf8(file.readAll()), cfg);
+    if (!parsed) { error(parsed.error()); return; }
+    const auto &c = *parsed;
     QDialog dialog(this);
     dialog.setWindowTitle(t("preview"));
     dialog.resize(850, 500);

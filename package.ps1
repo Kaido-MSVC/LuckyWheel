@@ -1,5 +1,5 @@
 param(
-    [string]$BuildDir = (Join-Path $PSScriptRoot 'build'),
+    [string]$BuildDir = (Join-Path $PSScriptRoot 'build-cpp23'),
     [string]$OutputDir = (Join-Path $PSScriptRoot 'packages'),
     [string]$NsisRoot = 'C:\Program Files (x86)\NSIS',
     [switch]$SkipBuild,

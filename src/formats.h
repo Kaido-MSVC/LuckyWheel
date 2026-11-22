@@ -4,6 +4,6 @@ namespace lw {
 QColor defaultColor(int row);
 Config exampleConfig();
 QString prizeCsv(const Config &c);
-std::optional<Config> importPrizeCsv(const QString &text, const Config &base, QString *error);
+[[nodiscard]] std::expected<Config, QString> importPrizeCsv(const QString &text, const Config &base);
 QString formatHelp(bool json);
 }

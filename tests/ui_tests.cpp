@@ -432,7 +432,7 @@ class UiTests : public QObject {
         dialogs(w, {selectFile(path)});
         w.findChild<QPushButton *>("exportHistory")->click();
         QFile file(path); QVERIFY(file.open(QIODevice::ReadOnly));
-        auto rows = lw::decodeCsv(QString::fromUtf8(file.readAll()), &e); QVERIFY(rows);
+        auto rows = lw::decodeCsv(QString::fromUtf8(file.readAll())); QVERIFY(rows);
         QCOMPARE(rows->first().first(), QString("sequence"));
         for (int i = 0; i < 2; ++i) QCOMPARE(rows->at(i + 1).first(), table->item(i, 0)->text());
         QCOMPARE(w.configuration().round, 8);

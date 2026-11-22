@@ -1,4 +1,4 @@
-# Microsoft redist 核對（2026-10-30）
+# Microsoft 執行階段來源核對
 
 Windows SDK 10.0.28000.0 的 d3dcompiler_47.dll、dxcompiler.dll、dxil.dll
 與本機 Redist/D3D/x64 原檔 SHA256 相符（source-provenance.json）。
@@ -7,10 +7,12 @@ https://learn.microsoft.com/en-us/legal/windows-sdk/redist
 LuckyWheel 是有實質抽獎功能的 Windows 桌面程式；不修改上述 DLL，保留著作權及通知。
 SDK 原始授權及第三方通知 RTF 原樣隨包；另附文字版方便閱讀。
 
-MSVC CRT 14.44.35112 的十個 DLL 與本機 VS 2026 Community 的
-VC/Redist/MSVC/14.44.35112/x64/Microsoft.VC143.CRT 相符，不含 Debug CRT。
+已發布的 v2.0.9 使用本機 VS 2026 Community 的
+`VC/Redist/MSVC/14.44.35112/x64/Microsoft.VC143.CRT`。
+C++23 本機建置使用 `VC/Redist/MSVC/14.52.37025/x64/Microsoft.VC145.CRT`。
+部署的十個 DLL 檔案版本均為 14.52.37029.0，SHA-256 與該目錄原檔相符，見 `source-provenance.json`。
 VS 2026 官方 redist 清單允許 VC/redist 下非 debug_nonredist 檔案隨程式散布，
-包含透過 VS 2026 安裝的相容 VC143 元件；本機使用 Stable Community（個人自有程式）。
+本機使用 Stable Community（個人自有程式）。
 https://learn.microsoft.com/en-us/visualstudio/releases/2026/redistribution
 https://visualstudio.microsoft.com/license-terms/vs2026-ga-community/
 原始官方 Word 授權的全文文字擷取附於 Microsoft-VS2026-Community-LICENSE.txt；

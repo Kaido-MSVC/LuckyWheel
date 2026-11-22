@@ -11,7 +11,7 @@ When a prize runs out, its probability becomes part of the no-prize outcome; the
 Download the [v2.0.9 installer or portable ZIP](https://github.com/Kaido-MSVC/LuckyWheel/releases/tag/v2.0.9). Extract the complete package and retain bundled libraries, license notices and distribution files. The program works offline. The project's own code is MIT-licensed; third-party components retain separate terms, including Microsoft component terms presented for acceptance on first launch. See the Chinese documentation below for the complete drawing rules and limitations.
 
 
-C++17 / Qt Widgets 幸運轉盤，支援獎品庫存、歷史紀錄、CSV/JSON 與九語介面。
+Qt Widgets 幸運轉盤，支援獎品庫存、歷史紀錄、CSV／JSON 與九語介面。目前開發中的原始碼使用 C++23。
 v2.0.9 修正首次啟動語言選擇及高 DPI／捲動／文字顯示，包含第三方授權通知與完整來源交付。
 
 **發布狀態：原始碼已公開，正式下載見 [GitHub Release v2.0.9](https://github.com/Kaido-MSVC/LuckyWheel/releases/tag/v2.0.9)。**
@@ -22,7 +22,7 @@ v2.0.9 修正首次啟動語言選擇及高 DPI／捲動／文字顯示，包含
 - 安裝版：[LuckyWheel-2.0.9-Windows-x64-Setup.exe](https://github.com/Kaido-MSVC/LuckyWheel/releases/download/v2.0.9/LuckyWheel-2.0.9-Windows-x64-Setup.exe)。
 - 免安裝版：完整解壓 [LuckyWheel-2.0.9-Windows-x64-Portable.zip](https://github.com/Kaido-MSVC/LuckyWheel/releases/download/v2.0.9/LuckyWheel-2.0.9-Windows-x64-Portable.zip)，開啟根目錄的 `LuckyWheel.exe`。
 - 原始碼：[LuckyWheel-2.0.9-source.zip](https://github.com/Kaido-MSVC/LuckyWheel/releases/download/v2.0.9/LuckyWheel-2.0.9-source.zip)，不含 runtime、build、packages、歷史驗證紀錄或舊網頁版。
-- 原始碼需自行建置：執行 `build.cmd`，完成後開啟 `build/dist/LuckyWheel.exe`；詳見 [BUILD.md](BUILD.md)。
+- 建置目前的原始碼請執行 `build.cmd`，完成後開啟 `build-cpp23/dist/LuckyWheel.exe`。詳見 [BUILD.md](BUILD.md)。
 
 第三方來源：[LuckyWheel-2.0.9-third-party-sources.zip](https://github.com/Kaido-MSVC/LuckyWheel/releases/download/v2.0.9/LuckyWheel-2.0.9-third-party-sources.zip)。
 檔案核對：[SHA256SUMS.txt](https://github.com/Kaido-MSVC/LuckyWheel/releases/download/v2.0.9/SHA256SUMS.txt)。程式與安裝包尚未簽章。

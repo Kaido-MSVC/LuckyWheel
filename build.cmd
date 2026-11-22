@@ -5,7 +5,7 @@ chcp 65001 >nul
 rem Build from any directory. Override LW_QT_ROOT / LW_NINJA / LW_BUILD_DIR if needed.
 if not defined LW_QT_ROOT set "LW_QT_ROOT=D:\Qt\6.12.0\msvc2022_64"
 if not defined LW_NINJA set "LW_NINJA=D:\Qt\Tools\Ninja\ninja.exe"
-if not defined LW_BUILD_DIR set "LW_BUILD_DIR=%~dp0build"
+if not defined LW_BUILD_DIR set "LW_BUILD_DIR=%~dp0build-cpp23"
 set "LW_VSWHERE=%ProgramFiles(x86)%\Microsoft Visual Studio\Installer\vswhere.exe"
 if not exist "%LW_VSWHERE%" exit /b 2
 for %%I in ("%LW_BUILD_DIR%") do set "LW_BUILD_DIR=%%~fI"
@@ -17,10 +17,15 @@ if not exist "%LW_BUILD_DIR%" mkdir "%LW_BUILD_DIR%"
 if errorlevel 1 exit /b 2
 for /f "usebackq delims=" %%I in ("%LW_BUILD_DIR%\vs-path.txt") do set "LW_VS_ROOT=%%I"
 if not defined LW_VS_ROOT exit /b 2
-call "%LW_VS_ROOT%\VC\Auxiliary\Build\vcvars64.bat" -vcvars_ver=14.44
+call "%LW_VS_ROOT%\VC\Auxiliary\Build\vcvars64.bat" -vcvars_ver=14.52
 if errorlevel 1 exit /b 2
 if not exist "%LW_QT_ROOT%\lib\cmake\Qt6\Qt6Config.cmake" exit /b 2
 if not exist "%LW_NINJA%" exit /b 2
+rem Use the Release runtime selected by the toolset without running a system installer.
+if not defined LW_CRT_ROOT set "LW_CRT_ROOT=%VCToolsRedistDir%x64\Microsoft.VC145.CRT"
+if not exist "%LW_CRT_ROOT%\msvcp140.dll" exit /b 2
+if not exist "%LW_CRT_ROOT%\vcruntime140.dll" exit /b 2
+if not exist "%LW_CRT_ROOT%\vcruntime140_1.dll" exit /b 2
 set "PATH=%LW_QT_ROOT%\bin;%PATH%"
 cmake -S "%~dp0." -B "%LW_BUILD_DIR%" -G Ninja "-DCMAKE_MAKE_PROGRAM=%LW_NINJA%" "-DCMAKE_PREFIX_PATH=%LW_QT_ROOT%" -DCMAKE_BUILD_TYPE=Release
 if errorlevel 1 exit /b 1
@@ -42,10 +47,6 @@ if not defined LW_D3D_REDIST set "LW_D3D_REDIST=%ProgramFiles(x86)%\Windows Kits
 if not exist "%LW_D3D_REDIST%" exit /b 2
 copy /y "%LW_D3D_REDIST%" "%LW_BUILD_DIR%\dist\d3dcompiler_47.dll" >nul
 if errorlevel 1 exit /b 1
-rem Use the existing matching redistributable DLLs; do not run a system installer.
-if not defined LW_CRT_ROOT set "LW_CRT_ROOT=%LW_VS_ROOT%\VC\Redist\MSVC\14.44.35112\x64\Microsoft.VC143.CRT"
-if not exist "%LW_CRT_ROOT%\msvcp140.dll" exit /b 2
-if not exist "%LW_CRT_ROOT%\vcruntime140_1.dll" exit /b 2
 copy /y "%LW_CRT_ROOT%\*.dll" "%LW_BUILD_DIR%\dist\" >nul
 if errorlevel 1 exit /b 1
 echo Build and automated tests completed. Output: %LW_BUILD_DIR%\dist\LuckyWheel.exe
