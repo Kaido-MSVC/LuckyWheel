@@ -1,6 +1,7 @@
 #include "core.h"
 #include <QCryptographicHash>
 #include <QFile>
+#include <QFileInfo>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QLocale>
@@ -9,6 +10,7 @@
 #include <QSet>
 #include <QSqlError>
 #include <QSqlQuery>
+#include <QTemporaryFile>
 #include <QUuid>
 #include <algorithm>
 #include <cmath>
@@ -340,7 +342,7 @@ bool Store::open(const QString &path, QString *error) {
     }
     QSqlQuery q(db);
     for (const auto &sql : QStringList{
-             "PRAGMA journal_mode=WAL", "PRAGMA synchronous=FULL",
+             "PRAGMA trusted_schema=OFF", "PRAGMA journal_mode=WAL", "PRAGMA synchronous=FULL",
              "CREATE TABLE IF NOT EXISTS settings (id INTEGER PRIMARY KEY CHECK(id=1), json TEXT NOT NULL)",
              "CREATE TABLE IF NOT EXISTS history (id INTEGER PRIMARY KEY AUTOINCREMENT, time TEXT NOT NULL, "
              "prize_id TEXT NOT NULL, name TEXT NOT NULL, round INTEGER NOT NULL, weight INTEGER NOT NULL, "
@@ -462,6 +464,8 @@ bool Store::draw(Config &c, const Outcome &o, const QString &missLabel, Record *
     return true;
 }
 QVector<Record> Store::history(QString *error) const {
+    if (error)
+        error->clear();
     QVector<Record> out;
     QSqlQuery q(db);
     if (!q.exec("SELECT id,time,prize_id,name,round,weight,ticket FROM history ORDER BY time DESC,id DESC")) {
@@ -472,6 +476,11 @@ QVector<Record> Store::history(QString *error) const {
     while (q.next())
         out.push_back({q.value(0).toLongLong(), q.value(1).toString(), q.value(2).toString(),
                        q.value(3).toString(), q.value(4).toInt(), q.value(5).toUInt(), q.value(6).toUInt()});
+    if (q.lastError().isValid()) {
+        if (error)
+            *error = q.lastError().text();
+        return {};
+    }
     QVector<qint64> ids;
     for (const auto &r : out) ids << r.id;
     std::sort(ids.begin(), ids.end());
@@ -507,22 +516,55 @@ bool Store::clearHistory(qint64 expectedCount, qint64 *deleted, QString *error) 
     return true;
 }
 bool Store::backup(const QString &path, QString *error) {
-    if (QFile::exists(path)) {
+    if (error)
+        error->clear();
+    const QString destination = QFileInfo(path).absoluteFilePath();
+    if (QFile::exists(destination)) {
         if (error)
             *error = "backup_exists";
         return false;
     }
+    QTemporaryFile staged(QFileInfo(destination).absolutePath() + "/.luckywheel-backup-XXXXXX");
+    if (!staged.open()) {
+        if (error)
+            *error = staged.errorString();
+        return false;
+    }
+    staged.close();
     QSqlQuery q(db);
     q.prepare("VACUUM INTO ?");
-    q.addBindValue(path);
+    q.addBindValue(staged.fileName());
     if (!q.exec()) {
         if (error)
             *error = q.lastError().text();
         return false;
     }
+    q.finish();
+    if (!staged.rename(destination)) {
+        if (error)
+            *error = QFile::exists(destination) ? QString("backup_exists") : staged.errorString();
+        return false;
+    }
+    staged.setAutoRemove(false);
     return true;
 }
+
+static bool hasBackupSchema(QSqlQuery &query) {
+    if (!query.exec("SELECT name,type,sql FROM main.sqlite_schema WHERE sql IS NOT NULL"))
+        return false;
+    QSet<QString> expected{"settings", "history", "sqlite_sequence"};
+    while (query.next()) {
+        if (query.value(1).toString() != "table" ||
+            !query.value(2).toString().startsWith("CREATE TABLE ", Qt::CaseInsensitive) ||
+            !expected.remove(query.value(0).toString()))
+            return false;
+    }
+    return expected.isEmpty() && !query.lastError().isValid();
+}
+
 bool Store::restore(const QString &path, QString *error) {
+    if (error)
+        error->clear();
     // Validate without changing the source backup, then restore both tables in one transaction.
     QString sourceName = QUuid::createUuid().toString();
     Config imported;
@@ -535,7 +577,8 @@ bool Store::restore(const QString &path, QString *error) {
         src.setConnectOptions("QSQLITE_OPEN_READONLY");
         if (src.open()) {
             QSqlQuery q(src);
-            if (q.exec("PRAGMA quick_check") && q.next() && q.value(0).toString() == "ok") {
+            if (q.exec("PRAGMA trusted_schema=OFF") && src.transaction() && hasBackupSchema(q) &&
+                q.exec("PRAGMA quick_check") && q.next() && q.value(0).toString() == "ok") {
                 q.finish();
                 if (q.exec("SELECT json FROM settings WHERE id=1") && q.next()) {
                     QJsonParseError pe;
@@ -546,22 +589,29 @@ bool Store::restore(const QString &path, QString *error) {
                     if (c) {
                         imported = *c;
                         q.finish();
-                        if (q.exec("SELECT id,time,prize_id,name,round,weight,ticket FROM history ORDER BY "
-                                   "id")) {
+                        if (q.exec("SELECT id,time,prize_id,name,round,weight,ticket,"
+                                   "typeof(id)='integer' AND typeof(round)='integer' AND "
+                                   "typeof(weight)='integer' AND typeof(ticket)='integer' "
+                                   "FROM history ORDER BY id")) {
                             ok = true;
                             while (q.next()) {
-                                Record r{q.value(0).toLongLong(), q.value(1).toString(),
-                                         q.value(2).toString(),   q.value(3).toString(),
-                                         q.value(4).toInt(),      q.value(5).toUInt(),
-                                         q.value(6).toUInt()};
-                                if (r.id < 1 || !QDateTime::fromString(r.time, Qt::ISODateWithMs).isValid() ||
-                                    r.round < 1 || r.weight > Scale || r.ticket >= Scale ||
-                                    r.name.isEmpty()) {
+                                const auto id = q.value(0).toLongLong();
+                                const auto time = q.value(1).toString();
+                                const auto name = q.value(3).toString();
+                                const auto round = q.value(4).toLongLong();
+                                const auto weight = q.value(5).toLongLong();
+                                const auto ticket = q.value(6).toLongLong();
+                                if (!q.value(7).toBool() || id < 1 || name.isEmpty() ||
+                                    !QDateTime::fromString(time, Qt::ISODateWithMs).isValid() ||
+                                    round < 1 || round > INT_MAX || weight < 0 || weight > Scale ||
+                                    ticket < 0 || ticket >= Scale) {
                                     ok = false;
                                     break;
                                 }
-                                records << r;
+                                records << Record{id, time, q.value(2).toString(), name, static_cast<int>(round),
+                                                  static_cast<quint32>(weight), static_cast<quint32>(ticket)};
                             }
+                            ok = ok && !q.lastError().isValid();
                         }
                     }
                 }
@@ -571,6 +621,7 @@ bool Store::restore(const QString &path, QString *error) {
             QSqlQuery seq(src);
             ok = seq.exec("SELECT seq FROM sqlite_sequence WHERE name='history'");
             if (ok && seq.next()) sourceSequence = seq.value(0).toLongLong();
+            ok = ok && !seq.lastError().isValid();
         }
         src.close();
     }

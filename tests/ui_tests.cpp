@@ -1,5 +1,6 @@
 #include "translations.h"
 #include "window.h"
+#include "appearance.h"
 #include "formats.h"
 #include <QColorDialog>
 #include <QPlainTextEdit>
@@ -18,19 +19,23 @@
 #include <QComboBox>
 #include <QDialogButtonBox>
 #include <QDir>
+#include <QElapsedTimer>
 #include <QFile>
 #include <QFileDialog>
 #include <QInputDialog>
 #include <QLabel>
+#include <QLayout>
 #include <QLocale>
 #include <QHeaderView>
 #include <QLineEdit>
+#include <QListWidget>
 #include <QEnterEvent>
 #include <QHoverEvent>
 #include <QMessageBox>
 #include <QPushButton>
 #include <QSoundEffect>
 #include <QStatusBar>
+#include <QStyleHints>
 #include <QStackedWidget>
 #include <QToolButton>
 #include <QTableWidget>
@@ -41,10 +46,24 @@
 #include <QSqlQuery>
 #include <QTranslator>
 #include <QtTest>
+#include <array>
 #include <cmath>
 #include <functional>
 #include <memory>
 using DialogAction = std::function<bool(QWidget *)>;
+class PaintTrace : public QObject {
+  public:
+    QElapsedTimer clock;
+    QList<qint64> paints;
+
+  protected:
+    bool eventFilter(QObject *, QEvent *event) override {
+        if (event->type() == QEvent::Paint && clock.isValid())
+            paints.push_back(clock.elapsed());
+        return false;
+    }
+};
+
 static void dialogs(MainWindow &w, QVector<DialogAction> actions) {
     auto *timer = new QTimer(&w);
     auto step = std::make_shared<int>(0);
@@ -166,10 +185,10 @@ class UiTests : public QObject {
             QVERIFY(store.save(cfg, &error));
         }
         MainWindow w(db); w.show(); w.resize(820, 620);
-        auto *summary = w.findChild<QLabel *>("probabilitySummary");
+        auto *summary = w.findChild<QListWidget *>("probabilitySummary");
         auto *result = w.findChild<QLabel *>("resultLabel");
-        QCOMPARE(summary->textFormat(), Qt::PlainText);
-        QVERIFY(summary->text().contains(name));
+        QCOMPARE(summary->item(0)->text(), name);
+        QVERIFY(summary->item(0)->toolTip().contains(name.toHtmlEscaped()));
         QCOMPARE(result->textFormat(), Qt::PlainText);
         w.findChild<QPushButton *>("spinButton")->click();
         QTRY_VERIFY_WITH_TIMEOUT(!w.isBusy(), 6000);
@@ -205,7 +224,8 @@ class UiTests : public QObject {
         for (int i = 0; i < languages->count(); ++i) {
             languages->setCurrentIndex(i);
             const auto code = languages->currentData().toString();
-            QCOMPARE(w.findChild<QLabel *>("resultLabel")->text(), uiText("lastResult", code) + "\n" + uiText("miss", code));
+            QCOMPARE(w.findChild<QLabel *>("resultCaption")->text(), uiText("lastResult", code));
+            QCOMPARE(w.findChild<QLabel *>("resultLabel")->text(), uiText("miss", code));
             QCOMPARE(w.findChild<QTableWidget *>("historyTable")->item(0, 3)->text(), uiText("miss", code));
         }
         QCOMPARE(w.recordCount(), 1);
@@ -548,8 +568,8 @@ class UiTests : public QObject {
         QVERIFY(table->item(0, 4)->text() != table->item(1, 4)->text());
         QCOMPARE(lw::toJson(w.configuration()), before);
         w.findChild<QPushButton *>("defaultColors")->click();
-        QCOMPARE(table->item(0, 4)->text(), lw::defaultColor(0).name());
-        QCOMPARE(table->item(1, 4)->text(), lw::defaultColor(1).name());
+        QCOMPARE(table->item(0, 4)->text(), appearance::prizeColor(0).name());
+        QCOMPARE(table->item(1, 4)->text(), appearance::prizeColor(1).name());
         table->item(0, 4)->setText("#123abc");
         w.findChild<QPushButton *>("savePrizes")->click();
         QCOMPARE(w.configuration().prizes[0].color.name(), QString("#123abc"));
@@ -571,27 +591,133 @@ class UiTests : public QObject {
             auto *pages = w.findChild<QStackedWidget *>("pages");
             auto *toggle = w.findChild<QToolButton *>("sidebarToggle");
             auto *wheel = w.findChild<WheelWidget *>("wheelCanvas");
+            auto *sidebar = w.findChild<QWidget *>("sidebar");
             QTest::qWait(80);
             const auto before = lw::toJson(w.configuration());
             const int expanded = wheel->width();
-            toggle->click();
-            QTest::qWait(80);
-            QVERIFY(wheel->width() > expanded);
-            QCOMPARE(w.findChild<QWidget *>("sidebar")->width(), 56);
+            QVERIFY(sidebar->isVisible());
+            QVERIFY(sidebar->width() > 0);
             for (int i = 0; i < 4; ++i) {
                 auto *nav = w.findChild<QToolButton *>(QString("nav%1").arg(i));
                 QVERIFY(!nav->accessibleName().isEmpty());
-                nav->click();
+                QVERIFY(!nav->icon().isNull());
+                QVERIFY(nav->isVisible());
+                QTest::mouseClick(nav, Qt::LeftButton);
                 QCOMPARE(pages->currentIndex(), i);
                 QVERIFY(nav->isChecked());
             }
+            pages->setCurrentIndex(0);
+            toggle->click();
+            QTRY_VERIFY(!sidebar->isVisible());
+            QCOMPARE(sidebar->width(), 0);
+            QVERIFY(wheel->width() > expanded);
+            QVERIFY(toggle->isVisible());
+            for (auto *nav : sidebar->findChildren<QToolButton *>())
+                QVERIFY(!nav->isVisible());
+            toggle->click();
+            QTest::qWait(45);
+            toggle->click();
+            QTRY_VERIFY(!sidebar->isVisible());
+            QCOMPARE(sidebar->width(), 0);
             QCOMPARE(lw::toJson(w.configuration()), before);
         }
         MainWindow reopened(db);
-        QCOMPARE(reopened.findChild<QWidget *>("sidebar")->width(), 56);
+        QCOMPARE(reopened.findChild<QWidget *>("sidebar")->width(), 0);
+        QVERIFY(reopened.findChild<QWidget *>("sidebar")->isHidden());
         reopened.findChild<QToolButton *>("sidebarToggle")->click();
         MainWindow expanded(db);
-        QCOMPARE(expanded.findChild<QWidget *>("sidebar")->width(), 206);
+        QVERIFY(expanded.findChild<QWidget *>("sidebar")->width() > 0);
+        QVERIFY(!expanded.findChild<QWidget *>("sidebar")->isHidden());
+    }
+    void translatedNavigationFitsAcrossLayouts() {
+        QTemporaryDir dir;
+        MainWindow w(dir.filePath("data.sqlite"));
+        w.show();
+        QVERIFY(QTest::qWaitForWindowExposed(&w));
+        qInfo() << "Navigation DPR" << w.devicePixelRatioF() << "desktop" << w.screen()->availableGeometry();
+        const QString expectedDpr = qEnvironmentVariable("LW_EXPECTED_DPR");
+        if (!expectedDpr.isEmpty())
+            QCOMPARE(w.devicePixelRatioF(), expectedDpr.toDouble());
+
+        auto *sidebar = w.findChild<QWidget *>("sidebar");
+        auto *card = w.findChild<QWidget *>("navigationCard");
+        auto *toggle = w.findChild<QToolButton *>("sidebarToggle");
+        auto *language = w.findChild<QComboBox *>("languageBox");
+        auto *pageScroll = w.findChild<QScrollArea *>("pagesScroll");
+        const std::array keys{"wheel", "prizes", "history", "settings"};
+        const auto naturalSize = w.size();
+        const QSize normalSize = QGuiApplication::platformName() == "offscreen" ? QSize(1160, 740) : naturalSize;
+        const QString output = qEnvironmentVariable("LW_SCREENSHOT_DIR");
+        if (!output.isEmpty())
+            QVERIFY(QDir().mkpath(output));
+
+        auto verifyExpanded = [&](bool requireSingleLine, const QString &captureMode = {}) {
+            bool wrapped = false;
+            for (int i = 0; i < language->count(); ++i) {
+                language->setCurrentIndex(i);
+                QCoreApplication::processEvents();
+                const QString code = language->currentData().toString();
+                QVERIFY(sidebar->isVisible());
+                QCOMPARE(sidebar->width(), card->width() + sidebar->layout()->contentsMargins().right());
+                for (int j = 0; j < keys.size(); ++j) {
+                    auto *nav = w.findChild<QToolButton *>(QString("nav%1").arg(j));
+                    QCOMPARE(nav->text(), uiText(keys[j], code));
+                    QCOMPARE(nav->accessibleName(), nav->text());
+                    QVERIFY(sidebar->rect().contains(QRect(nav->mapTo(sidebar, QPoint()), nav->size())));
+                    QVERIFY(nav->height() >= nav->heightForWidth(nav->width()));
+                    wrapped |= nav->width() < nav->sizeHint().width();
+                    if (requireSingleLine)
+                        QVERIFY2(nav->width() >= nav->sizeHint().width(), qPrintable(code + ": " + nav->text()));
+                }
+                for (const auto *name : {"wheelCanvas", "spinButton"}) {
+                    auto *widget = w.findChild<QWidget *>(name);
+                    QVERIFY2(pageScroll->viewport()->rect().contains(
+                                 QRect(widget->mapTo(pageScroll->viewport(), QPoint()), widget->size())),
+                             qPrintable(code + ": " + name));
+                }
+                if (!output.isEmpty() && !captureMode.isEmpty() &&
+                    (code == "es" || code == "de" || code == "pt" || code == "fr"))
+                    QVERIFY(w.grab().save(QDir(output).filePath(captureMode + "-" + code + ".png")));
+            }
+            if (captureMode == "compact")
+                QVERIFY(wrapped);
+        };
+
+        w.resize(normalSize);
+        verifyExpanded(true, "normal");
+        toggle->click();
+        QTRY_VERIFY(sidebar->isHidden());
+        for (int i = 0; i < language->count(); ++i) {
+            language->setCurrentIndex(i);
+            QCOMPARE(sidebar->width(), 0);
+            QVERIFY(sidebar->isHidden());
+            auto *settings = w.findChild<QToolButton *>("nav3");
+            QCOMPARE(settings->text(), uiText("settings", language->currentData().toString()));
+            QVERIFY(!settings->isVisible());
+        }
+
+        language->setCurrentIndex(language->findData("en"));
+        toggle->click();
+        language->setCurrentIndex(language->findData("de"));
+        QTRY_COMPARE(sidebar->width(), card->width() + sidebar->layout()->contentsMargins().right());
+        QVERIFY(w.findChild<QToolButton *>("nav3")->width() >= w.findChild<QToolButton *>("nav3")->sizeHint().width());
+        toggle->click();
+        language->setCurrentIndex(language->findData("pt"));
+        QTRY_VERIFY(sidebar->isHidden());
+        QCOMPARE(sidebar->width(), 0);
+        toggle->click();
+        QTRY_COMPARE(sidebar->width(), card->width() + sidebar->layout()->contentsMargins().right());
+
+        w.resize(w.minimumSize());
+        verifyExpanded(false, "compact");
+        w.showMaximized();
+        QTRY_VERIFY(w.isMaximized());
+        verifyExpanded(w.width() >= normalSize.width());
+        w.findChild<QPushButton *>("fullscreen")->click();
+        QTRY_VERIFY(w.isFullScreen());
+        verifyExpanded(w.width() >= normalSize.width());
+        w.findChild<QPushButton *>("fullscreen")->click();
+        QTRY_VERIFY(!w.isFullScreen());
     }
     void unsavedNavigationCloseAndDraw() {
         QTemporaryDir dir;
@@ -681,7 +807,7 @@ class UiTests : public QObject {
         w.show();
         auto *wheel = w.findChild<WheelWidget *>("wheelCanvas");
         QCOMPARE(wheel->getSlices()[0].label, w.configuration().prizes[0].name);
-        QVERIFY(w.findChild<QLabel *>("probabilitySummary")->text().contains(w.configuration().prizes[0].name));
+        QCOMPARE(w.findChild<QListWidget *>("probabilitySummary")->item(0)->text(), w.configuration().prizes[0].name);
         const QString output = qEnvironmentVariable("LW_SCREENSHOT_DIR");
         if (output.isEmpty()) return;
         QDir().mkpath(output);
@@ -700,8 +826,160 @@ class UiTests : public QObject {
                 QVERIFY(w.grab().save(output + QString("/layout-%1-%2x%3.png").arg(expanded).arg(size.width()).arg(size.height())));
                 QCOMPARE(w.size(), size);
             }
-            if (expanded) w.findChild<QToolButton *>("sidebarToggle")->click();
+            if (expanded) {
+                w.findChild<QToolButton *>("sidebarToggle")->click();
+                QTRY_VERIFY(w.findChild<QWidget *>("sidebar")->isHidden());
+            }
         }
+    }
+    void drawConsoleLayoutAndScale() {
+        QTemporaryDir dir;
+        const auto db = dir.filePath("data.sqlite");
+        QString error;
+        {
+            lw::Store store;
+            QVERIFY(store.open(db, &error));
+            lw::Config cfg;
+            cfg.language = "zh_TW";
+            cfg.round = 3;
+            cfg.prizes = {
+                {"weekend", "雙人住宿券", 270000, 2, 2, appearance::prizeColor(0)},
+                {"dining", "精選餐飲禮券", 220000, 8, 6, appearance::prizeColor(1)},
+                {"gift", "品牌禮盒", 150000, 10, 9, appearance::prizeColor(2)},
+                {"bonus", "購物折抵券", 90000, -1, -1, appearance::prizeColor(3)},
+                {"sold", "限量紀念組", 40000, 1, 0, appearance::prizeColor(4)}};
+            QVERIFY(store.save(cfg, &error));
+        }
+        MainWindow w(db);
+        w.show();
+        QVERIFY(QTest::qWaitForWindowExposed(&w));
+        const qreal dpr = w.devicePixelRatioF();
+        qInfo() << "DPR" << dpr << "desktop" << w.screen()->availableGeometry()
+                << "window" << w.size() << "platform" << QGuiApplication::platformName();
+        const QString expected = qEnvironmentVariable("LW_EXPECTED_DPR");
+        if (!expected.isEmpty())
+            QCOMPARE(dpr, expected.toDouble());
+        auto *wheel = w.findChild<WheelWidget *>("wheelCanvas");
+        auto *controls = w.findChild<QWidget *>("drawControls");
+        auto *sidebar = w.findChild<QWidget *>("sidebar");
+        auto *odds = w.findChild<QListWidget *>("probabilitySummary");
+        auto *scroll = w.findChild<QScrollArea *>("pagesScroll");
+        auto *spin = w.findChild<QPushButton *>("spinButton");
+        auto *round = w.findChild<QLabel *>("roundNumber");
+        auto inViewport = [&](QWidget *widget) {
+            return scroll->viewport()->rect().contains(QRect(widget->mapTo(scroll->viewport(), QPoint()), widget->size()));
+        };
+        QCOMPARE(odds->count(), 6);
+        QCOMPARE(odds->item(0)->data(appearance::Percent).toString(), QString("27.0000%"));
+        QCOMPARE(odds->item(4)->data(appearance::Percent).toString(), QString("0.0000%"));
+        QCOMPARE(odds->item(5)->data(appearance::Percent).toString(), QString("27.0000%"));
+        QCOMPARE(round->text(), QString("3"));
+        QVERIFY(inViewport(wheel));
+        QVERIFY(inViewport(round));
+        QVERIFY(inViewport(spin));
+        for (int i = 0; i < odds->count(); ++i)
+            QCOMPARE(odds->item(i)->data(appearance::Swatch).value<QColor>(), wheel->getSlices()[i].color);
+        const QString output = qEnvironmentVariable("LW_SCREENSHOT_DIR");
+        auto capture = [&](const QString &name) {
+            if (output.isEmpty())
+                return true;
+            QDir().mkpath(output);
+            QTest::qWait(50);
+            return w.grab().save(QDir(output).filePath(name + ".png"));
+        };
+        QVERIFY(capture("draw-expanded"));
+        w.findChild<QToolButton *>("sidebarToggle")->click();
+        QTRY_VERIFY(sidebar->isHidden());
+        QVERIFY(capture("draw-collapsed"));
+        auto *theme = w.findChild<QComboBox *>("themeBox");
+        theme->setCurrentIndex(theme->findData("dark"));
+        QVERIFY(odds->palette().color(QPalette::Text).lightness() >
+                odds->palette().color(QPalette::Base).lightness());
+        w.findChild<QToolButton *>("sidebarToggle")->click();
+        QTRY_VERIFY(sidebar->width() >= sidebar->findChild<QWidget *>("navigationCard")->width());
+        QVERIFY(capture("draw-dark"));
+
+        w.resize(w.minimumSize());
+        QCoreApplication::processEvents();
+        QVERIFY(inViewport(wheel));
+        QVERIFY(inViewport(round));
+        QVERIFY(inViewport(spin));
+        const QRect wheelRect(wheel->mapTo(&w, QPoint()), wheel->size());
+        const QRect consoleRect(controls->mapTo(&w, QPoint()), controls->size());
+        QVERIFY(!wheelRect.intersects(consoleRect));
+        QVERIFY(wheelRect.width() >= wheel->minimumWidth());
+        QVERIFY(capture("draw-compact"));
+        w.showMaximized();
+        QTRY_VERIFY(w.isMaximized());
+        QVERIFY(capture("draw-maximized"));
+        w.showNormal();
+        QTRY_VERIFY(!w.isMaximized());
+
+        const auto before = lw::missWeight(w.configuration());
+        w.findChild<QCheckBox *>("showSold")->setChecked(false);
+        QCOMPARE(lw::missWeight(w.configuration()), before);
+        QCOMPARE(wheel->getSlices().size(), 5);
+        QCOMPARE(wheel->getSlices().back().weight, before);
+        QCOMPARE(odds->item(4)->data(appearance::Swatch).value<QColor>(), QColor(Qt::transparent));
+    }
+    void largeProbabilityListCanScroll() {
+        QTemporaryDir dir;
+        const auto db = dir.filePath("data.sqlite");
+        QString error;
+        const QString name = QString(120, QChar(0x734E));
+        {
+            lw::Store store;
+            QVERIFY(store.open(db, &error));
+            lw::Config cfg;
+            cfg.prizes = {{"long", name, 250000, -1, -1, appearance::prizeColor(0)}};
+            for (int i = 1; i < 200; ++i)
+                cfg.prizes.push_back({QString::number(i), QString::number(i), 1234, -1, -1, appearance::prizeColor(i)});
+            QVERIFY(store.save(cfg, &error));
+        }
+        MainWindow w(db);
+        w.show();
+        auto *odds = w.findChild<QListWidget *>("probabilitySummary");
+        auto *wheel = w.findChild<WheelWidget *>("wheelCanvas");
+        QCOMPARE(odds->count(), 201);
+        QCOMPARE(wheel->getSlices().size(), 201);
+        QCOMPARE(odds->item(0)->text(), name);
+        QCOMPARE(odds->item(199)->data(appearance::Percent).toString(), QString("0.1234%"));
+        QCOMPARE(odds->item(200)->data(appearance::Percent).toString(), QString("50.4434%"));
+        QTRY_VERIFY(odds->verticalScrollBar()->maximum() > 0);
+        odds->scrollToBottom();
+        QVERIFY(odds->viewport()->rect().intersects(odds->visualItemRect(odds->item(200))));
+        QVERIFY(w.findChild<QPushButton *>("spinButton")->isVisible());
+    }
+    void followSystemThemeStaysLocal() {
+        QTemporaryDir dir;
+        const auto db = dir.filePath("data.sqlite");
+        {
+            MainWindow w(db);
+            auto *theme = w.findChild<QComboBox *>("themeBox");
+            theme->setCurrentIndex(theme->findData("dark"));
+            const auto explicitTheme = lw::toJson(w.configuration());
+            theme->setCurrentIndex(theme->findData("system"));
+            QCOMPARE(lw::toJson(w.configuration()), explicitTheme);
+            auto *styleHints = QGuiApplication::styleHints();
+            const auto systemScheme = styleHints->colorScheme();
+            QCOMPARE(w.palette().color(QPalette::Window).lightness() < 128, systemScheme == Qt::ColorScheme::Dark);
+            const auto nextScheme = systemScheme == Qt::ColorScheme::Dark ? Qt::ColorScheme::Light : Qt::ColorScheme::Dark;
+            styleHints->setColorScheme(nextScheme);
+            const bool platformAppliedOverride = styleHints->colorScheme() == nextScheme;
+            if (platformAppliedOverride) {
+                QTRY_COMPARE(w.palette().color(QPalette::Window).lightness() < 128, nextScheme == Qt::ColorScheme::Dark);
+            }
+            styleHints->unsetColorScheme();
+            QTRY_COMPARE(w.palette().color(QPalette::Window).lightness() < 128, systemScheme == Qt::ColorScheme::Dark);
+            qInfo() << "System scheme" << systemScheme << "in-process platform override" << platformAppliedOverride;
+        }
+        MainWindow reload(db);
+        auto *theme = reload.findChild<QComboBox *>("themeBox");
+        QCOMPARE(theme->currentData().toString(), QString("system"));
+        QCOMPARE(reload.configuration().theme, QString("dark"));
+        theme->setCurrentIndex(theme->findData("light"));
+        MainWindow explicitReload(db);
+        QCOMPARE(explicitReload.findChild<QComboBox *>("themeBox")->currentData().toString(), QString("light"));
     }
     void clearHistoryConfirmCancelAndRefresh() {
         QTemporaryDir dir;
@@ -834,7 +1112,8 @@ class UiTests : public QObject {
             QCOMPARE(wheel->getSlices()[2].label, QString("C"));
             QCOMPARE(wheel->getSlices()[2].weight, quint32(123456));
             QCOMPARE(lw::missWeight(w.configuration()), quint32(576544));
-            QVERIFY(w.findChild<QLabel *>("probabilitySummary")->text().contains("57.6544%"));
+            auto *odds = w.findChild<QListWidget *>("probabilitySummary");
+            QCOMPARE(odds->item(odds->count() - 1)->data(appearance::Percent).toString(), QString("57.6544%"));
             const QString output = qEnvironmentVariable("LW_SCREENSHOT_DIR");
             if (!output.isEmpty()) {
                 QDir().mkpath(output);
@@ -1002,22 +1281,41 @@ class UiTests : public QObject {
         }
         MainWindow w(dir.filePath("data.sqlite"));
         w.show();
+        auto *wheel = w.findChild<WheelWidget *>("wheelCanvas");
+        PaintTrace trace;
+        wheel->installEventFilter(&trace);
+        trace.clock.start();
         w.findChild<QPushButton *>("spinButton")->click();
+        QVERIFY(w.isBusy());
+        QCOMPARE(w.findChild<QWidget *>("resultCard")->property("status").toString(), QString("spinning"));
+        w.findChild<QToolButton *>("sidebarToggle")->click();
+        w.resize(w.minimumSize());
+        auto *theme = w.findChild<QComboBox *>("themeBox");
+        QVERIFY(theme->isEnabled());
+        theme->setCurrentIndex(theme->findData("dark"));
+        QCOMPARE(w.configuration().theme, QString("dark"));
+        QCOMPARE(w.configuration().prizes[0].remaining, 0);
         QTest::qWait(3500);
+        qint64 longestGap = 0;
+        for (int i = 1; i < trace.paints.size(); ++i)
+            longestGap = qMax(longestGap, trace.paints[i] - trace.paints[i - 1]);
+        qInfo() << "Wheel paint count" << trace.paints.size() << "longest inter-paint gap (ms)" << longestGap;
         QVERIFY(w.isBusy());
         QVERIFY(!w.findChild<QPushButton *>("clearHistory")->isEnabled());
-        auto *wheel = w.findChild<WheelWidget *>("wheelCanvas");
         QCOMPARE(wheel->getSlices()[0].prize, 0);
         double landing = std::fmod(360. - wheel->rotation(), 360.);
         if (landing < 0)
             landing += 360.;
         QVERIFY(std::abs(landing - 180.) < 0.1);
         QCOMPARE(w.findChild<QLabel *>("resultLabel")->text(), QString("Last"));
+        QCOMPARE(w.findChild<QWidget *>("resultCard")->property("status").toString(), QString("won"));
         QTRY_VERIFY_WITH_TIMEOUT(!w.isBusy(), 2500);
         QCOMPARE(w.configuration().prizes[0].remaining, 0);
         QCOMPARE(wheel->getSlices().size(), 1);
         QCOMPARE(wheel->getSlices()[0].prize, -1);
         QCOMPARE(wheel->getSlices()[0].weight, lw::Scale);
+        QCOMPARE(w.recordCount(), 1);
+        QCOMPARE(w.findChild<QTableWidget *>("historyTable")->item(0, 3)->text(), QString("Last"));
     }
     void resetKeepsHistory() {
         QTemporaryDir dir;

@@ -1,6 +1,7 @@
 #pragma once
 #include "core.h"
 #include <QMainWindow>
+#include <QPixmap>
 #include <QPropertyAnimation>
 #include <QSoundEffect>
 #include <QWidget>
@@ -9,11 +10,14 @@ class QPushButton;
 class QTableWidget;
 class QStackedWidget;
 class QToolButton;
+class QFrame;
 class QSettings;
 class QCloseEvent;
 class QComboBox;
 class QCheckBox;
 class QSlider;
+class QListWidget;
+class QVariantAnimation;
 class WheelWidget : public QWidget {
     Q_OBJECT
     Q_PROPERTY(double rotation READ rotation WRITE setRotation)
@@ -28,10 +32,15 @@ class WheelWidget : public QWidget {
     }
     void setSlices(const QVector<lw::Slice> &s) {
         view = s;
+        face = QPixmap();
         update();
     }
     void setCelebrate(bool v) {
         celebrate = v;
+        update();
+    }
+    void setDark(bool value) {
+        dark = value;
         update();
     }
     const QVector<lw::Slice> &getSlices() const {
@@ -42,9 +51,20 @@ class WheelWidget : public QWidget {
     void paintEvent(QPaintEvent *) override;
 
   private:
+    struct SliceLabel {
+        double bearing;
+        QStringList lines;
+        QColor ink;
+    };
+    void rebuildFace(int diameter, qreal dpr);
     double angle = 0;
     QVector<lw::Slice> view;
+    QPixmap face;
+    int faceDiameter = 0;
+    QFont labelFont;
+    QVector<SliceLabel> labels;
     bool celebrate = false;
+    bool dark = false;
 };
 class MainWindow : public QMainWindow {
     Q_OBJECT
@@ -73,6 +93,7 @@ class MainWindow : public QMainWindow {
     QSoundEffect *winSound, *missSound;
     QStackedWidget *pages;
     QWidget *sidebar;
+    QFrame *navigationCard;
     QToolButton *sidebarToggle;
     QVector<QToolButton *> navigation;
     QSettings *uiSettings;
@@ -80,24 +101,32 @@ class MainWindow : public QMainWindow {
     QToolButton *moreToggle;
     QWidget *moreOptions;
     QLabel *colorGroup, *fileGroup, *stockGroup;
-    bool hasLastResult = false;
-    QString resultKey = "ready";
     QStringList savedDraft;
     QStringList prizeDraft() const;
     bool resolveDraft();
     void updateDraftHint();
-    void updateSidebar();
+    void updateSidebar(bool animate = false);
+    void updateSidebarWidth(bool animate = false);
     void navigate(int index);
   protected:
+    bool event(QEvent *event) override;
     void closeEvent(QCloseEvent *event) override;
   private:
-    QTableWidget *prizeTable, *historyTable;
-    QLabel *resultLabel, *summaryLabel, *rulesLabel, *editHint, *settingsHint, *languageLabel, *themeLabel,
+    enum class Status { Ready, Saved, Spinning, Won, Miss };
+    void showStatus(Status status);
+    QTableWidget *prizeTable = nullptr, *historyTable = nullptr;
+    QWidget *resultCard;
+    QLabel *pageTitle, *brandLabel, *roundLabel, *roundNumber, *resultCaption, *probabilityTitle;
+    QListWidget *probabilities;
+    QLabel *resultLabel, *rulesLabel, *editHint, *settingsHint, *languageLabel, *themeLabel,
         *volumeLabel, *dataLabel;
     QComboBox *languageBox, *themeBox;
     QCheckBox *showSold, *soundBox;
     QSlider *volumeSlider;
     QPushButton *spinButton, *lockButton, *clearHistoryButton;
+    QVariantAnimation *sidebarMotion = nullptr;
+    bool followSystem = false;
+    Status status = Status::Ready;
     QLabel *historySummary;
     QVector<QWidget *> mutators;
     QVector<QPair<QPushButton *, QString>> buttons;
@@ -108,6 +137,7 @@ class MainWindow : public QMainWindow {
     void fillHistory();
     void updateView();
     void updateEnabled();
+    bool darkTheme() const;
     void applyTheme();
     void error(const QString &message);
     bool confirm(const QString &message);

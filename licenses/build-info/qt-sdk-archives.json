@@ -1,0 +1,22 @@
+{
+  "qtbase": {
+    "url": "https://download.qt.io/online/qtsdkrepository/windows_x86/desktop/qt6_6121/qt6_6121_msvc2022_64/qt.qt6.6121.win64_msvc2022_64/6.12.1-0-202611180427qtbase-Windows-Windows_11_24H2-MSVC2022-Windows-Windows_11_24H2-X86_64.7z",
+    "officialSha1": "45309adb3dc34a62dba891b620e4076233bb7f0c",
+    "sha256": "7e96dac9569f350c4e328be9f4a53ed18175ebfeec3e997cdd16832582ceb71e"
+  },
+  "qtsvg": {
+    "url": "https://download.qt.io/online/qtsdkrepository/windows_x86/desktop/qt6_6121/qt6_6121_msvc2022_64/qt.qt6.6121.win64_msvc2022_64/6.12.1-0-202611180427qtsvg-Windows-Windows_11_24H2-MSVC2022-Windows-Windows_11_24H2-X86_64.7z",
+    "officialSha1": "20e1dfde74c5b4dd0e72052ede6df94ae640621d",
+    "sha256": "a45551f4e5876ad1b2cd8d969967f78f5040f3c31cf9991892a3da130b8ee739"
+  },
+  "qtmultimedia": {
+    "url": "https://download.qt.io/online/qtsdkrepository/windows_x86/desktop/qt6_6121/qt6_6121_msvc2022_64/qt.qt6.6121.addons.qtmultimedia.win64_msvc2022_64/6.12.1-0-202611180427qtmultimedia-Windows-Windows_11_24H2-MSVC2022-Windows-Windows_11_24H2-X86_64.7z",
+    "officialSha1": "2f0486ef37d832711bdc06d2f6a2b11d586b81da",
+    "sha256": "f70caa38a0d3eb7203e361965eb52dba287710f653c18bb71e7f767cf9705b05"
+  },
+  "qtimageformats": {
+    "url": "https://download.qt.io/online/qtsdkrepository/windows_x86/desktop/qt6_6121/qt6_6121_msvc2022_64/qt.qt6.6121.addons.qtimageformats.win64_msvc2022_64/6.12.1-0-202611180427qtimageformats-Windows-Windows_11_24H2-MSVC2022-Windows-Windows_11_24H2-X86_64.7z",
+    "officialSha1": "069dcf21b424a4c3d21e79c77d7c21f3bcf71ec3",
+    "sha256": "5f757033000aba6f7e60b0886333c2baf8fd81b94be0f4d7bd48e4732b094612"
+  }
+}

@@ -1,4 +1,5 @@
 #include "window.h"
+#include "appearance.h"
 #include "formats.h"
 #include <QColorDialog>
 #include <QTranslator>
@@ -20,6 +21,7 @@
 #include <QFileDialog>
 #include <QFileInfo>
 #include <QFormLayout>
+#include <QFrame>
 #include <QHeaderView>
 #include <QInputDialog>
 #include <QJsonDocument>
@@ -27,9 +29,9 @@
 #include <QStatusBar>
 #include <QIcon>
 #include <QLineEdit>
+#include <QListWidget>
 #include <QMessageBox>
 #include <QPainter>
-#include <QPainterPath>
 #include <QPushButton>
 #include <QSaveFile>
 #include <QScrollArea>
@@ -42,16 +44,112 @@
 #include <QSettings>
 #include <QCloseEvent>
 #include <QStyle>
+#include <QStyleHints>
+#include <QStyleOptionToolButton>
 #include <QGridLayout>
 #include <QResizeEvent>
-#include <QTextLayout>
 #include <QTableWidget>
 #include <QTimer>
 #include <QUuid>
+#include <QVariantAnimation>
 #include <QVBoxLayout>
 #include <algorithm>
+#include <array>
 #include <climits>
 #include <cmath>
+
+namespace {
+constexpr int preferredSidebarWidth = 196;
+constexpr int compactSidebarWidth = 128;
+constexpr int compactContentWidth = 500;
+const std::array<QString, 4> pageKeys{"wheel", "prizes", "history", "settings"};
+
+QFrame *card(const char *name) {
+    auto *frame = new QFrame;
+    frame->setObjectName(name);
+    frame->setProperty("card", true);
+    return frame;
+}
+
+void setPlainText(QLabel *label, const QString &text) {
+    label->setTextFormat(Qt::PlainText);
+    label->setText(text);
+}
+
+class NavigationButton : public QToolButton {
+  public:
+    QSize sizeHint() const override {
+        int textWidth = 0;
+        for (const auto weight : {QFont::Normal, QFont::DemiBold}) {
+            const QFontMetrics metrics(captionFont(weight), this);
+            textWidth = qMax(textWidth, qMax(metrics.horizontalAdvance(text()), metrics.boundingRect(text()).width()));
+        }
+        const int preferred = captionLeft + textWidth + captionRight + 2;
+        return {preferred, heightForWidth(preferred)};
+    }
+
+    int heightForWidth(int width) const override {
+        const QRect bounds = captionRect(QRect(0, 0, width, 0));
+        int captionHeight = 0;
+        for (const auto weight : {QFont::Normal, QFont::DemiBold}) {
+            const QFontMetrics metrics(captionFont(weight), this);
+            captionHeight = qMax(captionHeight, metrics.boundingRect(bounds, captionFlags(metrics, bounds), text()).height());
+        }
+        return qMax(40, captionHeight + 12);
+    }
+
+  protected:
+    void paintEvent(QPaintEvent *) override {
+        QStyleOptionToolButton option;
+        initStyleOption(&option);
+        option.text.clear();
+        option.icon = {};
+        QPainter p(this);
+        style()->drawComplexControl(QStyle::CC_ToolButton, &option, &p, this);
+        icon().paint(&p, QRect(QPoint(iconLeft, (height() - iconExtent) / 2), QSize(iconExtent, iconExtent)));
+        p.setPen(option.palette.color(QPalette::ButtonText));
+        p.setFont(captionFont(isChecked() ? QFont::DemiBold : QFont::Normal));
+        const QRect bounds = captionRect(rect());
+        p.drawText(bounds, captionFlags(p.fontMetrics(), bounds), text());
+    }
+
+  private:
+    static constexpr int iconLeft = 12;
+    static constexpr int iconExtent = 20;
+    static constexpr int captionLeft = iconLeft + iconExtent + 10;
+    static constexpr int captionRight = 9;
+
+    QFont captionFont(QFont::Weight weight) const {
+        QFont result = font();
+        result.setWeight(weight);
+        return result;
+    }
+
+    static QRect captionRect(const QRect &area) {
+        return {area.x() + captionLeft, area.y(), qMax(1, area.width() - captionLeft - captionRight), area.height()};
+    }
+
+    int captionFlags(const QFontMetrics &metrics, const QRect &bounds) const {
+        constexpr int alignment = Qt::AlignLeft | Qt::AlignVCenter;
+        constexpr int wordWrap = alignment | Qt::TextWordWrap;
+        // 只有單字本身比文字區域寬時，才在字元邊界換行。
+        if (metrics.boundingRect(bounds, wordWrap, text()).width() > bounds.width())
+            return alignment | Qt::TextWrapAnywhere;
+        return wordWrap;
+    }
+};
+
+class PageStack : public QStackedWidget {
+  public:
+    int heightForWidth(int width) const override {
+        const auto *page = currentWidget();
+        if (!page)
+            return 0;
+        // 捲動區只需容納目前頁面的最小高度，清單可在控制台內縮短。
+        return qMax(page->minimumSizeHint().height(), page->layout()->minimumHeightForWidth(width));
+    }
+};
+} // namespace
 
 // Fit translated button captions without reducing the window's supported minimum size.
 class ActionPanel : public QWidget {
@@ -115,93 +213,6 @@ class PrizeTable : public QTableWidget {
         closeEditor(editor, QAbstractItemDelegate::NoHint);
     }
 };
-WheelWidget::WheelWidget(QWidget *p) : QWidget(p) {
-    setMinimumSize(280, 280);
-    setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    setObjectName("wheelCanvas");
-}
-void WheelWidget::paintEvent(QPaintEvent *) {
-    QPainter p(this);
-    p.setRenderHint(QPainter::Antialiasing);
-    double size = qMin(width(), height()) - 48;
-    QRectF circle(-size / 2, -size / 2, size, size);
-    p.translate(width() / 2., height() / 2.);
-    p.save();
-    p.rotate(angle);
-    double start = 0;
-    for (const auto &s : view) {
-        double span = 360. * s.weight / lw::Scale;
-        p.setBrush(s.color);
-        p.setPen(QPen(Qt::white, 1.5));
-        QPainterPath slice;
-        slice.moveTo(0, 0);
-        slice.arcTo(circle, 90 - start, -span);
-        slice.closeSubpath();
-        p.drawPath(slice);
-        if (span >= 8) {
-            p.save();
-            p.rotate(start + span / 2);
-            p.translate(0, -size * .34);
-            // Account for both the slice and the current animated rotation.
-            double textAngle = std::fmod(angle + start + span / 2 - 90, 360.);
-            if (textAngle < 0) textAngle += 360.;
-            p.rotate(-90 + ((textAngle > 90 && textAngle <= 270) ? 180 : 0));
-            QFont f = font();
-            f.setPixelSize(int(qBound(11., size * .035, 18.)));
-            f.setBold(true);
-            p.setFont(f);
-            p.setPen(QColor("#142237"));
-            // Two bounded lines on wider slices; narrow slices use one elided line.
-            const double textWidth = size * .32;
-            const int maxLines = span >= 16 ? 2 : 1;
-            QTextLayout layout(s.label, f);
-            QTextOption option;
-            option.setWrapMode(QTextOption::WrapAtWordBoundaryOrAnywhere);
-            layout.setTextOption(option);
-            layout.beginLayout();
-            QStringList lines;
-            int offset = 0;
-            for (int i = 0; i < maxLines; ++i) {
-                auto line = layout.createLine();
-                if (!line.isValid()) break;
-                line.setLineWidth(textWidth);
-                int length = line.textLength();
-                lines << (i == maxLines - 1
-                    ? p.fontMetrics().elidedText(s.label.mid(offset), Qt::ElideRight, int(textWidth))
-                    : s.label.mid(offset, length).trimmed());
-                offset += length;
-            }
-            layout.endLayout();
-            const double height = p.fontMetrics().height();
-            for (int i = 0; i < lines.size(); ++i)
-                p.drawText(QRectF(-textWidth / 2, -height * lines.size() / 2 + i * height,
-                                 textWidth, height), Qt::AlignCenter, lines[i]);
-            p.restore();
-        }
-        start += span;
-    }
-    p.restore();
-    p.setPen(QPen(QColor("#304365"), 3));
-    p.setBrush(Qt::white);
-    p.drawEllipse(QPointF(0, 0), 20, 20);
-    QPolygonF arrow;
-    arrow << QPointF(0, -size / 2 + 17) << QPointF(-13, -size / 2 - 12) << QPointF(13, -size / 2 - 12);
-    p.setBrush(QColor("#ef4565"));
-    p.setPen(Qt::NoPen);
-    p.drawPolygon(arrow);
-    if (celebrate) {
-        for (int i = 0; i < 34; ++i) {
-            double a = i * 2.399963;
-            double r = size * (.42 + .1 * (i % 3));
-            p.setBrush(QColor::fromHsv((i * 37) % 360, 190, 245));
-            p.save();
-            p.translate(std::cos(a) * r, std::sin(a) * r);
-            p.rotate(i * 23);
-            p.drawRect(QRectF(-3, -5, 6, 10));
-            p.restore();
-        }
-    }
-}
 QString MainWindow::t(const QString &key) const {
     return uiText(key, cfg.language);
 }
@@ -213,9 +224,12 @@ QPushButton *MainWindow::button(const QString &key, const QString &name) {
 }
 MainWindow::MainWindow(const QString &dataPath, QWidget *parent) : QMainWindow(parent) {
     setWindowIcon(QIcon(":/icons/luckywheel.ico"));
-    const QSize desktop = screen() ? screen()->availableGeometry().size() - QSize(40, 80) : QSize(1160, 830);
-    setMinimumSize(QSize(820, 620).boundedTo(desktop));
-    resize(QSize(1160, 830).boundedTo(desktop));
+    const QSize desktop = screen() ? screen()->availableGeometry().size() - QSize(24, 50) : QSize(1160, 830);
+    setMinimumSize(QSize(740, 500).boundedTo(desktop.expandedTo(QSize(320, 260))));
+    resize(QSize(1160, 780).boundedTo(desktop.expandedTo(minimumSize())));
+    QFont uiFont = font();
+    uiFont.setPointSize(10);
+    setFont(uiFont);
     QDir().mkpath(QFileInfo(dataPath).absolutePath());
     if (!store.open(dataPath, &startupError))
         return;
@@ -224,54 +238,90 @@ MainWindow::MainWindow(const QString &dataPath, QWidget *parent) : QMainWindow(p
         return;
     if (cfg.prizes.isEmpty()) {
         cfg.prizes = {
-            {QUuid::createUuid().toString(QUuid::WithoutBraces), "A", 100000, 3, 3, QColor("#72b8ff")},
-            {QUuid::createUuid().toString(QUuid::WithoutBraces), "B", 200000, 5, 5, QColor("#a8dca6")}};
+            {QUuid::createUuid().toString(QUuid::WithoutBraces), "A", 100000, 3, 3, appearance::prizeColor(0)},
+            {QUuid::createUuid().toString(QUuid::WithoutBraces), "B", 200000, 5, 5, appearance::prizeColor(1)}};
         if (!store.save(cfg, &startupError))
             return;
     }
     locked = !cfg.lockHash.isEmpty();
     auto *central = new QWidget;
-    auto *root = new QHBoxLayout(central);
-    root->setContentsMargins(12, 12, 12, 12);
-    root->setSpacing(10);
+    auto *root = new QVBoxLayout(central);
+    root->setContentsMargins(14, 12, 14, 8);
+    root->setSpacing(12);
     uiSettings = new QSettings(QFileInfo(dataPath).absolutePath() + "/ui.ini", QSettings::IniFormat, this);
     sidebarExpanded = uiSettings->value("sidebarExpanded", true).toBool();
-    sidebar = new QWidget;
-    sidebar->setObjectName("sidebar");
-    auto *navLayout = new QVBoxLayout(sidebar);
-    navLayout->setContentsMargins(2, 2, 2, 2);
+    followSystem = uiSettings->value("followSystemTheme", false).toBool();
+    auto *topBar = card("topBar");
+    auto *top = new QHBoxLayout(topBar);
+    top->setContentsMargins(7, 5, 14, 5);
+    top->setSpacing(12);
     sidebarToggle = new QToolButton;
     sidebarToggle->setObjectName("sidebarToggle");
-    sidebarToggle->setMinimumHeight(44);
-    navLayout->addWidget(sidebarToggle);
-    const QList<QStyle::StandardPixmap> icons{QStyle::SP_MediaPlay, QStyle::SP_FileDialogDetailedView,
-                                             QStyle::SP_FileDialogContentsView, QStyle::SP_ComputerIcon};
-    for (int i = 0; i < 4; ++i) {
-        auto *nav = new QToolButton;
+    sidebarToggle->setIconSize(QSize(20, 20));
+    sidebarToggle->setFixedSize(38, 36);
+    sidebarToggle->setFocusPolicy(Qt::StrongFocus);
+    top->addWidget(sidebarToggle);
+    pageTitle = new QLabel;
+    pageTitle->setObjectName("pageTitle");
+    pageTitle->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Preferred);
+    top->addWidget(pageTitle, 1);
+    brandLabel = new QLabel;
+    brandLabel->setObjectName("brand");
+    top->addWidget(brandLabel);
+    root->addWidget(topBar);
+
+    auto *body = new QHBoxLayout;
+    body->setSpacing(0);
+    root->addLayout(body, 1);
+    sidebar = new QWidget(central);
+    sidebar->setObjectName("sidebar");
+    auto *sidebarLayout = new QHBoxLayout(sidebar);
+    sidebarLayout->setSizeConstraint(QLayout::SetNoConstraint);
+    sidebarLayout->setContentsMargins(0, 0, 12, 0);
+    navigationCard = card("navigationCard");
+    sidebarLayout->addWidget(navigationCard);
+    auto *navLayout = new QVBoxLayout(navigationCard);
+    navLayout->setContentsMargins(7, 8, 7, 8);
+    navLayout->setSpacing(4);
+    for (int i = 0; i < pageKeys.size(); ++i) {
+        auto *nav = new NavigationButton;
         nav->setObjectName(QString("nav%1").arg(i));
-        nav->setIcon(style()->standardIcon(icons[i]));
-        nav->setIconSize(QSize(22, 22));
-        nav->setMinimumHeight(48);
-        nav->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Fixed);
+        nav->setProperty("navigation", true);
+        nav->setMinimumHeight(40);
+        nav->setFocusPolicy(Qt::StrongFocus);
+        nav->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
         nav->setCheckable(true);
         navigation << nav;
         navLayout->addWidget(nav);
         connect(nav, &QToolButton::clicked, this, [this, i] { navigate(i); });
     }
     navLayout->addStretch();
-    root->addWidget(sidebar);
-    pages = new QStackedWidget;
+    sidebar->setFixedWidth(0);
+    sidebar->hide();
+    body->addWidget(sidebar);
+    sidebarMotion = new QVariantAnimation(this);
+    sidebarMotion->setDuration(190);
+    sidebarMotion->setEasingCurve(QEasingCurve::OutCubic);
+    connect(sidebarMotion, &QVariantAnimation::valueChanged, sidebar, [this](const QVariant &value) {
+        sidebar->setFixedWidth(value.toInt());
+    });
+    connect(sidebarMotion, &QVariantAnimation::finished, sidebar, [this] {
+        sidebar->setVisible(sidebarExpanded);
+    });
+
+    pages = new PageStack;
     pages->setObjectName("pages");
-    // Keep page content usable when high DPI leaves less than 620 logical pixels
-    // of desktop height. Navigation stays visible while the page can scroll.
-    pages->setMinimumSize(560, 560);
+    // 小視窗優先縮短機率清單，讓轉盤和抽獎按鈕仍能同時顯示。
+    pages->setMinimumSize(438, 334);
     auto *pagesScroll = new QScrollArea;
     pagesScroll->setObjectName("pagesScroll");
     pagesScroll->setFrameShape(QFrame::NoFrame);
     pagesScroll->setWidgetResizable(true);
     pagesScroll->setWidget(pages);
-    root->addWidget(pagesScroll, 1);
+    body->addWidget(pagesScroll, 1);
     connect(pages, &QStackedWidget::currentChanged, this, [this, pagesScroll] {
+        pages->setMinimumHeight(pages->currentIndex() == 0 ? 334 : 396);
+        pagesScroll->setWidgetResizable(true);
         updateSidebar();
         pagesScroll->verticalScrollBar()->setValue(0);
         pagesScroll->horizontalScrollBar()->setValue(0);
@@ -280,59 +330,89 @@ MainWindow::MainWindow(const QString &dataPath, QWidget *parent) : QMainWindow(p
         sidebarExpanded = !sidebarExpanded;
         uiSettings->setValue("sidebarExpanded", sidebarExpanded);
         uiSettings->sync();
-        updateSidebar();
+        updateSidebar(true);
     });
     setCentralWidget(central);
     auto *drawPage = new QWidget;
+    drawPage->setObjectName("drawPage");
     auto *drawLayout = new QVBoxLayout(drawPage);
-    drawLayout->setSpacing(10);
+    drawLayout->setContentsMargins(0, 0, 0, 0);
     auto *content = new QHBoxLayout;
+    content->setSpacing(12);
+    auto *stage = card("wheelStage");
+    auto *stageLayout = new QVBoxLayout(stage);
+    stageLayout->setContentsMargins(8, 6, 8, 10);
+    stageLayout->setSpacing(0);
     wheel = new WheelWidget;
-    content->addWidget(wheel, 3);
-    auto *side = new QVBoxLayout;
+    stageLayout->addWidget(wheel, 1);
+    rulesLabel = new QLabel;
+    rulesLabel->setObjectName("drawRules");
+    rulesLabel->setAlignment(Qt::AlignCenter);
+    rulesLabel->setWordWrap(true);
+    rulesLabel->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Preferred);
+    stageLayout->addWidget(rulesLabel);
+    content->addWidget(stage, 3);
+
+    auto *drawControls = card("drawControls");
+    auto *side = new QVBoxLayout(drawControls);
+    side->setContentsMargins(13, 13, 13, 13);
+    side->setSpacing(10);
+    auto *round = new QHBoxLayout;
+    roundLabel = new QLabel;
+    roundLabel->setObjectName("roundLabel");
+    roundNumber = new QLabel;
+    roundNumber->setObjectName("roundNumber");
+    round->addWidget(roundLabel, 1);
+    round->addWidget(roundNumber);
+    side->addLayout(round);
+    resultCard = new QFrame;
+    resultCard->setObjectName("resultCard");
+    auto *result = new QVBoxLayout(resultCard);
+    result->setContentsMargins(12, 8, 12, 10);
+    result->setSpacing(2);
+    resultCaption = new QLabel;
+    resultCaption->setObjectName("resultCaption");
+    result->addWidget(resultCaption);
     resultLabel = new QLabel;
     resultLabel->setTextFormat(Qt::PlainText);
     resultLabel->setObjectName("resultLabel");
     resultLabel->setWordWrap(true);
     resultLabel->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Preferred);
-    resultLabel->setAlignment(Qt::AlignCenter);
-    resultLabel->setStyleSheet(
-        "font-size:26px;font-weight:700;padding:18px;border-radius:12px;background:#193659;color:white;");
-    side->addStretch();
-    side->addWidget(resultLabel);
-    summaryLabel = new QLabel;
-    summaryLabel->setTextFormat(Qt::PlainText);
-    summaryLabel->setObjectName("probabilitySummary");
-    summaryLabel->setWordWrap(true);
-    summaryLabel->setTextInteractionFlags(Qt::TextSelectableByMouse);
-    summaryLabel->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Preferred);
-    auto *summaryScroll = new QScrollArea;
-    summaryScroll->setWidgetResizable(true);
-    summaryScroll->setFrameShape(QFrame::NoFrame);
-    summaryScroll->setWidget(summaryLabel);
-    summaryScroll->setMinimumHeight(150);
-    summaryScroll->setMaximumHeight(350);
-    side->addWidget(summaryScroll);
+    resultLabel->setTextInteractionFlags(Qt::TextSelectableByMouse);
+    result->addWidget(resultLabel);
+    side->addWidget(resultCard);
+    probabilityTitle = new QLabel;
+    probabilityTitle->setObjectName("probabilityTitle");
+    probabilityTitle->setWordWrap(true);
+    side->addWidget(probabilityTitle);
+    probabilities = new QListWidget;
+    probabilities->setObjectName("probabilitySummary");
+    appearance::configureProbabilityList(probabilities);
+    side->addWidget(probabilities, 1);
     showSold = new QCheckBox;
     showSold->setObjectName("showSold");
     side->addWidget(showSold);
     mutators << showSold;
     spinButton = button("spin", "spinButton");
-    spinButton->setMinimumHeight(56);
+    spinButton->setProperty("primary", true);
+    spinButton->setIconSize(QSize(18, 18));
+    spinButton->setMinimumHeight(48);
     side->addWidget(spinButton);
-    side->addStretch();
-    auto *drawControls = new QWidget;
-    drawControls->setLayout(side);
-    drawControls->setMinimumWidth(230);
-    drawControls->setMaximumWidth(310);
-    content->addWidget(drawControls, 1);
+    auto *consoleColumn = new QWidget;
+    consoleColumn->setMinimumWidth(230);
+    consoleColumn->setMaximumWidth(338);
+    auto *consoleLayout = new QVBoxLayout(consoleColumn);
+    consoleLayout->setContentsMargins(0, 0, 0, 0);
+    consoleLayout->addStretch();
+    consoleLayout->addWidget(drawControls);
+    consoleLayout->addStretch();
+    content->addWidget(consoleColumn, 2);
     drawLayout->addLayout(content, 1);
-    rulesLabel = new QLabel;
-    rulesLabel->setWordWrap(true);
-    drawLayout->addWidget(rulesLabel);
     pages->addWidget(drawPage);
-    auto *prizePage = new QWidget;
+    auto *prizePage = card("prizesPage");
     auto *prizeLayout = new QVBoxLayout(prizePage);
+    prizeLayout->setContentsMargins(16, 14, 16, 14);
+    prizeLayout->setSpacing(10);
     prizeLayout->setAlignment(Qt::AlignTop);
     editHint = new QLabel;
     editHint->setWordWrap(true);
@@ -341,6 +421,8 @@ MainWindow::MainWindow(const QString &dataPath, QWidget *parent) : QMainWindow(p
     prizeTable = new PrizeTable;
     prizeTable->setObjectName("prizeTable");
     prizeTable->setSelectionBehavior(QAbstractItemView::SelectRows);
+    prizeTable->setAlternatingRowColors(true);
+    prizeTable->setShowGrid(false);
     prizeTable->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     prizeTable->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Stretch);
     prizeTable->horizontalHeader()->setMinimumSectionSize(110);
@@ -369,13 +451,14 @@ MainWindow::MainWindow(const QString &dataPath, QWidget *parent) : QMainWindow(p
     fileGroup = new QLabel;
     for (auto *label : {stockGroup, colorGroup, fileGroup}) {
         label->setWordWrap(true);
-        label->setStyleSheet("font-weight:bold;");
+        label->setProperty("groupHeading", true);
     }
     auto *prizeActions = new QGridLayout;
     int actionIndex = 0;
     auto *add = button("add", "addPrize");
     auto *remove = button("remove", "removePrize");
     auto *save = button("save", "savePrizes");
+    save->setProperty("primary", true);
     auto *reload = button("reload", "reloadPrizes");
     auto *reset = button("reset", "resetStock");
     mutators << add << remove << save;
@@ -441,14 +524,21 @@ MainWindow::MainWindow(const QString &dataPath, QWidget *parent) : QMainWindow(p
     });
     
     pages->addWidget(prizePage);
-    auto *historyPage = new QWidget;
+    auto *historyPage = card("historyPage");
     auto *historyLayout = new QVBoxLayout(historyPage);
+    historyLayout->setContentsMargins(16, 14, 16, 14);
+    historyLayout->setSpacing(10);
     historySummary = new QLabel;
     historySummary->setObjectName("historySummary");
+    historySummary->setWordWrap(true);
     historyLayout->addWidget(historySummary);
     historyTable = new QTableWidget(0, 6);
     historyTable->setObjectName("historyTable");
     historyTable->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    historyTable->setSelectionBehavior(QAbstractItemView::SelectRows);
+    historyTable->setAlternatingRowColors(true);
+    historyTable->setShowGrid(false);
+    historyTable->verticalHeader()->setDefaultSectionSize(30);
     historyTable->horizontalHeader()->setMinimumSectionSize(90);
     historyTable->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
     historyTable->horizontalHeader()->setSectionResizeMode(3, QHeaderView::Stretch);
@@ -459,12 +549,17 @@ MainWindow::MainWindow(const QString &dataPath, QWidget *parent) : QMainWindow(p
     mutators << clearHistoryButton;
     historyLayout->addWidget(new ActionPanel({exportCsv, stats, clearHistoryButton}, 3));
     pages->addWidget(historyPage);
-    auto *settingsPage = new QWidget;
+    auto *settingsPage = card("settingsPage");
     auto *settingsLayout = new QVBoxLayout(settingsPage);
+    settingsLayout->setContentsMargins(16, 14, 16, 14);
+    settingsLayout->setSpacing(14);
     settingsHint = new QLabel;
     settingsHint->setWordWrap(true);
     settingsLayout->addWidget(settingsHint);
     auto *form = new QFormLayout;
+    form->setFieldGrowthPolicy(QFormLayout::AllNonFixedFieldsGrow);
+    form->setHorizontalSpacing(20);
+    form->setVerticalSpacing(10);
     languageLabel = new QLabel;
     languageBox = new QComboBox;
     languageBox->setObjectName("languageBox");
@@ -479,6 +574,7 @@ MainWindow::MainWindow(const QString &dataPath, QWidget *parent) : QMainWindow(p
     themeBox->setObjectName("themeBox");
     themeBox->addItem("", "light");
     themeBox->addItem("", "dark");
+    themeBox->addItem("", "system");
     form->addRow(themeLabel, themeBox);
     soundBox = new QCheckBox;
     soundBox->setObjectName("soundBox");
@@ -489,7 +585,7 @@ MainWindow::MainWindow(const QString &dataPath, QWidget *parent) : QMainWindow(p
     volumeSlider->setRange(0, 100);
     form->addRow(volumeLabel, volumeSlider);
     settingsLayout->addLayout(form);
-    mutators << languageBox << themeBox << soundBox << volumeSlider;
+    mutators << languageBox << soundBox << volumeSlider;
     auto *full = button("fullscreen", "fullscreen");
     auto *backupBtn = button("backup", "backup");
     auto *restoreBtn = button("restore", "restore");
@@ -500,6 +596,7 @@ MainWindow::MainWindow(const QString &dataPath, QWidget *parent) : QMainWindow(p
     connect(aboutBtn, &QPushButton::clicked, this, &MainWindow::about);
     mutators << restoreBtn;
     dataLabel = new QLabel;
+    dataLabel->setObjectName("dataPath");
     dataLabel->setTextFormat(Qt::PlainText);
     dataLabel->setWordWrap(true);
     dataLabel->setTextInteractionFlags(Qt::TextSelectableByMouse);
@@ -525,7 +622,7 @@ MainWindow::MainWindow(const QString &dataPath, QWidget *parent) : QMainWindow(p
     });
     connect(spinButton, &QPushButton::clicked, this, &MainWindow::draw);
     connect(animation, &QPropertyAnimation::finished, this, [this] {
-        resultLabel->setText(pendingName);
+        showStatus(pendingWon ? Status::Won : Status::Miss);
         wheel->setCelebrate(pendingWon);
         fillPrizes();
         fillHistory();
@@ -540,8 +637,6 @@ MainWindow::MainWindow(const QString &dataPath, QWidget *parent) : QMainWindow(p
             busy = false;
             updateView();
             updateEnabled();
-            hasLastResult = true;
-            resultLabel->setText(t("lastResult") + "\n" + pendingName);
         });
     });
     connect(add, &QPushButton::clicked, this, [this] {
@@ -554,7 +649,7 @@ MainWindow::MainWindow(const QString &dataPath, QWidget *parent) : QMainWindow(p
         }
         prizeTable->insertRow(row);
         QStringList values{t("name") + QString::number(row + 1), "0.0000", "-1", "-1",
-                           lw::defaultColor(row).name()};
+                           appearance::prizeColor(row).name()};
         for (int j = 0; j < 5; ++j)
             prizeTable->setItem(row, j, new QTableWidgetItem(values[j]));
         prizeTable->item(row, 0)->setData(Qt::UserRole, QUuid::createUuid().toString(QUuid::WithoutBraces));
@@ -630,15 +725,29 @@ MainWindow::MainWindow(const QString &dataPath, QWidget *parent) : QMainWindow(p
             translate();
     });
     connect(themeBox, &QComboBox::currentIndexChanged, this, [this](int index) {
-        if (filling || busy || locked)
+        if (filling || locked || index < 0)
             return;
-        auto c = cfg;
-        c.theme = themeBox->itemData(index).toString();
-        if (persist(c))
-            applyTheme();
-        else
-            translate();
+        const QString selected = themeBox->itemData(index).toString();
+        const bool system = selected == "system";
+        // SQLite 與匯出的設定維持既有的 light、dark 欄位值。
+        if (!system && selected != cfg.theme) {
+            auto c = cfg;
+            c.theme = selected;
+            if (!persist(c)) {
+                const QSignalBlocker blocker(themeBox);
+                themeBox->setCurrentIndex(themeBox->findData(followSystem ? "system" : cfg.theme));
+                return;
+            }
+        }
+        followSystem = system;
+        uiSettings->setValue("followSystemTheme", followSystem);
+        uiSettings->sync();
+        applyTheme();
     });
+    connect(QGuiApplication::styleHints(), &QStyleHints::colorSchemeChanged, this, [this] {
+        if (followSystem)
+            applyTheme();
+    }, Qt::QueuedConnection);
     connect(soundBox, &QCheckBox::toggled, this, [this](bool value) {
         if (filling || busy || locked)
             return;
@@ -668,7 +777,6 @@ MainWindow::MainWindow(const QString &dataPath, QWidget *parent) : QMainWindow(p
     updateView();
     applyTheme();
     updateEnabled();
-    resultLabel->setText(t("ready"));
 }
 void MainWindow::translate() {
     filling = true;
@@ -685,16 +793,19 @@ void MainWindow::translate() {
     stockGroup->setText(t("stockGroup"));
     moreOptions->findChild<QLabel *>("stockRules")->setText(t("stockRules"));
     statusBar()->clearMessage();
-    if (!busy) resultLabel->setText(hasLastResult
-        ? t("lastResult") + "\n" + (pendingWon ? pendingName : t("miss")) : t(resultKey));
     setWindowTitle(t("title") + " " + LW_VERSION + "[*]");
+    brandLabel->setText(t("title"));
     setWindowModified(prizeDraft() != savedDraft);
     for (auto pair : buttons)
         pair.first->setText(QString(t(pair.second)).replace("&", "&&"));
+    showStatus(status);
     updateSidebar();
     prizeTable->setHorizontalHeaderLabels({t("name"), t("prob"), t("limit"), t("remaining"), t("color")});
     historyTable->setHorizontalHeaderLabels(
         {t("sequence"), t("time"), t("round"), t("result"), t("prob"), t("ticket")});
+    roundLabel->setText(t("round"));
+    probabilityTitle->setText(t("prizeOdds"));
+    probabilities->setAccessibleName(probabilityTitle->text());
     rulesLabel->setText(t("rules"));
     prizeTable->setToolTip(t("stockRules") + "\n" + t("colorHint"));
     for (auto pair : buttons) pair.first->setToolTip(t(pair.second));
@@ -705,14 +816,18 @@ void MainWindow::translate() {
     showSold->setToolTip(t("showSold"));
     showSold->setChecked(cfg.showSoldOut);
     languageLabel->setText(t("language"));
+    languageLabel->setBuddy(languageBox);
     languageBox->setCurrentIndex(languageBox->findData(cfg.language));
     themeLabel->setText(t("theme"));
+    themeLabel->setBuddy(themeBox);
     themeBox->setItemText(0, t("light"));
     themeBox->setItemText(1, t("dark"));
-    themeBox->setCurrentIndex(themeBox->findData(cfg.theme));
+    themeBox->setItemText(2, t("systemTheme"));
+    themeBox->setCurrentIndex(themeBox->findData(followSystem ? "system" : cfg.theme));
     soundBox->setText(t("sound"));
     soundBox->setChecked(cfg.sound);
     volumeLabel->setText(t("volume"));
+    volumeLabel->setBuddy(volumeSlider);
     volumeSlider->setValue(cfg.volume);
     dataLabel->setText(t("data") + ": " + store.path());
     settingsHint->setText(locked ? t("lockedInfo") : t("rules"));
@@ -768,20 +883,92 @@ int MainWindow::recordCount() const {
     return historyTable ? historyTable->rowCount() : 0;
 }
 void MainWindow::updateView() {
-    wheel->setSlices(lw::slices(cfg, t("miss"), t("sold")));
-    QString summary = t("round") + ": " + QString::number(cfg.round) + "\n";
-    for (const auto &p : cfg.prizes)
-        summary +=
-            p.name + ": " + lw::percent(p.active() ? p.weight : 0) + "%" +
-            (p.limit >= 0 ? " · " + QString::number(p.remaining) + "/" + QString::number(p.limit) : "") +
-            (!p.active() ? " · " + t("sold") : p.weight == 0 ? " · " + t("zero") : "") + "\n";
-    summary += t("miss") + ": " + lw::percent(lw::missWeight(cfg)) + "%";
-    summaryLabel->setText(summary);
+    roundNumber->setText(QString::number(cfg.round));
+    const auto view = lw::slices(cfg, t("miss"), t("sold"));
+    wheel->setSlices(view);
+    const auto sold = std::ranges::find_if(view, [](const lw::Slice &slice) { return slice.soldOut; });
+    const auto miss = std::ranges::find_if(view, [](const lw::Slice &slice) { return slice.prize < 0 && !slice.soldOut; });
+    const QColor soldColor = sold != view.end() ? sold->color : QColor(Qt::transparent);
+    const QColor missColor = miss != view.end() ? miss->color : soldColor;
+    const int scrollPosition = probabilities->verticalScrollBar()->value();
+    probabilities->clear();
+    auto addRow = [this](const QString &name, quint32 weight, const QString &details, const QColor &color) {
+        auto *row = new QListWidgetItem(name, probabilities);
+        const QString percent = lw::percent(weight) + "%";
+        row->setData(appearance::Percent, percent);
+        row->setData(appearance::Details, details);
+        row->setData(appearance::Swatch, color);
+        const QString description = details.isEmpty() ? name + " · " + percent
+                                                       : name + " · " + percent + " · " + details;
+        row->setData(Qt::AccessibleTextRole, description);
+        row->setToolTip("<qt>" + description.toHtmlEscaped() + "</qt>");
+    };
+    for (const auto &prize : cfg.prizes) {
+        const bool active = prize.active();
+        QStringList details;
+        if (prize.limit >= 0)
+            details << QString::number(prize.remaining) + "/" + QString::number(prize.limit);
+        if (!active)
+            details << t("sold");
+        else if (!prize.weight)
+            details << t("zero");
+        const QColor color = !prize.weight ? QColor(Qt::transparent) : active ? prize.color : soldColor;
+        addRow(prize.name, active ? prize.weight : 0, details.join(" · "), color);
+    }
+    addRow(t("miss"), lw::missWeight(cfg), {}, missColor);
+    probabilities->doItemsLayout();
+    // 短清單緊接抽獎按鈕，長清單在控制台內捲動。
+    int listHeight = 2 * probabilities->frameWidth();
+    for (int row = 0; row < probabilities->count() && listHeight < 260; ++row)
+        listHeight += probabilities->sizeHintForRow(row);
+    probabilities->setMaximumHeight(qBound(90, listHeight + 2, 260));
+    probabilities->verticalScrollBar()->setValue(scrollPosition);
+}
+void MainWindow::showStatus(Status next) {
+    status = next;
+    QString state;
+    QString caption = t("drawStatus");
+    QString value;
+    switch (status) {
+    case Status::Ready:
+        state = "ready";
+        value = t("ready");
+        break;
+    case Status::Saved:
+        state = "ready";
+        value = t("saved");
+        break;
+    case Status::Spinning:
+        state = "spinning";
+        value = t("spinning");
+        break;
+    case Status::Won:
+        state = "won";
+        caption = t("drawWon");
+        value = pendingName;
+        break;
+    case Status::Miss:
+        state = "miss";
+        caption = t("lastResult");
+        value = t("miss");
+        break;
+    }
+    if (resultCard->property("status").toString() != state) {
+        resultCard->setProperty("status", state);
+        resultCard->style()->unpolish(resultCard);
+        resultCard->style()->polish(resultCard);
+        resultCard->update();
+    }
+    resultCaption->setText(caption);
+    setPlainText(resultLabel, value);
+    resultLabel->setToolTip("<qt>" + value.toHtmlEscaped() + "</qt>");
+    spinButton->setText(t(status == Status::Spinning ? "spinning" : "spin"));
 }
 void MainWindow::updateEnabled() {
     spinButton->setEnabled(!busy);
     for (auto *w : mutators)
         w->setEnabled(!busy && !locked);
+    themeBox->setEnabled(!locked);
     clearHistoryButton->setEnabled(!busy && !locked && recordCount() > 0);
     lockButton->setEnabled(!busy);
     for (auto pair : buttons)
@@ -791,38 +978,25 @@ void MainWindow::updateEnabled() {
     lockButton->setText(t(locked ? "unlock" : "lock"));
     settingsHint->setText(locked ? t("lockedInfo") : t("rules"));
 }
+bool MainWindow::darkTheme() const {
+    return followSystem ? QGuiApplication::styleHints()->colorScheme() == Qt::ColorScheme::Dark
+                        : cfg.theme == "dark";
+}
 void MainWindow::applyTheme() {
-    QString bg = cfg.theme == "dark" ? "#172033" : "#f1f5fb",
-            fg = cfg.theme == "dark" ? "#eef4ff" : "#182840",
-            panel = cfg.theme == "dark" ? "#25334b" : "#ffffff";
-    const bool dark = cfg.theme == "dark";
-    const QString hover = dark ? "#344e72" : "#e1edff";
-    const QString pressed = dark ? "#16385f" : "#bdd6fa";
-    const QString disabled = dark ? "#202a3a" : "#e3e8ef";
-    setStyleSheet(QString(
-        "QMainWindow,QWidget{background:%1;color:%2;font-family:'Segoe UI','Microsoft JhengHei';font-size:11pt;}"
-        "QPushButton,QToolButton{padding:9px;border:2px solid #7b91b3;border-radius:7px;background:%3;}"
-        "QPushButton:hover,QToolButton:hover{background:%4;border-color:#397dd0;}"
-        "QPushButton:focus,QToolButton:focus{border:2px solid #ed9b19;}"
-        "QPushButton:pressed,QToolButton:pressed{background:%5;border-style:inset;padding-top:11px;padding-bottom:7px;}"
-        "QPushButton:disabled,QToolButton:disabled{background:%6;color:#8692a6;border-color:#99a1ae;}"
-        "QPushButton#spinButton{background:#176fe5;color:white;font-size:20px;font-weight:bold;border-radius:10px;}"
-        "QPushButton#spinButton:hover{background:#095cc8;border-color:#76b4ff;}"
-        "QPushButton#spinButton:focus{border-color:#ed9b19;}"
-        "QPushButton#spinButton:pressed{background:#08418d;border-style:inset;}"
-        "QPushButton#spinButton:disabled{background:%6;color:#8692a6;border-color:#99a1ae;}"
-        "QToolButton:checked{background:%4;border-color:#397dd0;}"
-        "QTableWidget,QComboBox{background:%3;selection-background-color:#397dd0;}"
-        "QHeaderView::section{padding:8px;background:%3;border:1px solid #7b91b3;}"
-        "QTabBar::tab{padding:10px 20px;border:2px solid transparent;}"
-        "QTabBar::tab:hover{background:%4;}QTabBar::tab:pressed{background:%5;}"
-        "QTabBar::tab:selected{background:%3;border-bottom:3px solid #397dd0;}"
-        "QTabBar:focus{border:2px solid #ed9b19;}QTabBar::tab:disabled{color:#8692a6;}"
-        "QCheckBox:hover{color:#397dd0;}QCheckBox:focus{outline:2px solid #ed9b19;}"
-        "QCheckBox:pressed{background:%5;}QCheckBox:disabled{color:#8692a6;}"
-    ).arg(bg, fg, panel, hover, pressed, disabled));
+    const bool dark = darkTheme();
+    appearance::applyTheme(this, dark);
+    probabilities->setPalette(palette());
+    wheel->setDark(dark);
+    using appearance::Icon;
+    constexpr std::array icons{Icon::Wheel, Icon::Prizes, Icon::History, Icon::Settings};
+    sidebarToggle->setIcon(appearance::icon(Icon::Menu, dark));
+    for (int i = 0; i < navigation.size(); ++i)
+        navigation[i]->setIcon(appearance::icon(icons[i], dark));
+    updateSidebarWidth();
+    spinButton->setIcon(appearance::icon(Icon::Draw, dark, true));
     for (auto *widget : findChildren<QWidget *>())
-        if (auto *actions = dynamic_cast<ActionPanel *>(widget)) actions->arrange();
+        if (auto *actions = dynamic_cast<ActionPanel *>(widget))
+            actions->arrange();
 }
 void MainWindow::error(const QString &e) {
     QString message = t(e);
@@ -912,8 +1086,7 @@ void MainWindow::applyPrizes() {
         const QString zeroHint = hasZero ? "\n" + t("zeroInfo") : QString();
         editHint->setText(t("saveSuccess") + "\n" + t("colorHint") + zeroHint);
         statusBar()->showMessage(t("saveSuccess") + zeroHint + ": " + store.path(), 10000);
-        hasLastResult = false; resultKey = "saved";
-        resultLabel->setText(t("saved"));
+        showStatus(Status::Saved);
     }
 }
 void MainWindow::draw() {
@@ -944,7 +1117,7 @@ void MainWindow::draw() {
     animation->setEndValue(target);
     pendingName = o.index < 0 ? t("miss") : snapshot.prizes[o.index].name;
     pendingWon = o.index >= 0;
-    resultLabel->setText(t("spinning"));
+    showStatus(Status::Spinning);
     animation->start();
 }
 void MainWindow::resetStock() {
@@ -1094,8 +1267,7 @@ void MainWindow::backup() {
     if (!store.backup(path, &e))
         error(e);
     else {
-        hasLastResult = false; resultKey = "saved";
-        resultLabel->setText(t("saved"));
+        showStatus(Status::Saved);
         statusBar()->showMessage(t("backup") + " · " + t("saved") + ": " + path, 8000);
     }
 }
@@ -1128,8 +1300,7 @@ void MainWindow::restore() {
     updateView();
     updateEnabled();
     applyTheme();
-    hasLastResult = false; resultKey = "saved";
-    resultLabel->setText(t("saved"));
+    showStatus(Status::Saved);
     statusBar()->showMessage(t("restore") + " · " + t("saved"), 6000);
 }
 void MainWindow::showCounts(const QString &title, const QVector<QPair<QString, qint64>> &counts, qint64 total,
@@ -1288,7 +1459,7 @@ void MainWindow::chooseColor() {
     if (row < 0) { statusBar()->showMessage(t("selectPrize"), 6000); return; }
     auto *item = prizeTable->item(row, 4);
     QColor initial(item->text().trimmed());
-    QColorDialog dialog(initial.isValid() ? initial : lw::defaultColor(row), this);
+    QColorDialog dialog(initial.isValid() ? initial : appearance::prizeColor(row), this);
     dialog.setObjectName("prizeColorDialog");
     dialog.setWindowTitle(t("chooseColor"));
     dialog.setOption(QColorDialog::DontUseNativeDialog);
@@ -1299,7 +1470,8 @@ void MainWindow::recolor(bool defaults) {
     if (busy || locked) return;
     static_cast<PrizeTable *>(prizeTable)->finishEditing();
     for (int i = 0; i < prizeTable->rowCount(); ++i)
-        prizeTable->item(i, 4)->setText((defaults ? lw::defaultColor(i) : QColor::fromHsv((i * 137 + 25) % 360, 110, 235)).name());
+        prizeTable->item(i, 4)->setText((defaults ? appearance::prizeColor(i)
+                                                  : QColor::fromHsv((i * 137 + 25) % 360, 105, 220)).name());
 }
 void MainWindow::previewDraft() {
     if (busy || locked) return;
@@ -1314,6 +1486,7 @@ void MainWindow::previewDraft() {
     QLabel hint(t("draftPreviewHint")); hint.setWordWrap(true); layout.addWidget(&hint);
     WheelWidget preview;
     preview.setObjectName("draftPreviewWheel");
+    preview.setDark(darkTheme());
     preview.setSlices(lw::slices(*draft, t("miss"), t("sold")));
     layout.addWidget(&preview, 1);
     QDialogButtonBox actions;
@@ -1396,7 +1569,6 @@ void MainWindow::about() {
         "  https://ffmpeg.org/releases/ffmpeg-9.0.1.tar.gz\n"
         "• zlib, libpng, libjpeg, FreeType, HarfBuzz, PCRE2, SQLite, md4c, libtiff, libwebp, libpsl, Unicode data\n"
         "  (bundled in Qt) — BSD / MIT / Zlib / FTL / Unicode / public domain\n"
-        "• Mesa llvmpipe (opengl32sw.dll) — MIT\n"
         "• Microsoft Direct3D / DirectX Shader Compiler — Windows SDK redistributable terms\n"
         "• Microsoft Visual C++ Runtime — Visual Studio redistributable terms").arg(qVersion());
     QPlainTextEdit text;
@@ -1467,21 +1639,67 @@ bool MainWindow::resolveDraft() {
     }
     return false;
 }
-void MainWindow::updateSidebar() {
-    sidebar->setFixedWidth(sidebarExpanded ? 206 : 56);
-    sidebarToggle->setText(sidebarExpanded ? "‹ " + sidebarToggle->fontMetrics().elidedText(t("collapseNav"), Qt::ElideRight, 152) : "☰");
+void MainWindow::updateSidebar(bool animate) {
     sidebarToggle->setToolTip(t(sidebarExpanded ? "collapseNav" : "expandNav"));
     sidebarToggle->setAccessibleName(sidebarToggle->toolTip());
-    const QStringList keys{"wheel", "prizes", "history", "settings"};
+    const int current = pages->currentIndex();
+    if (current >= 0)
+        pageTitle->setText(t(pageKeys[current]));
     for (int i = 0; i < navigation.size(); ++i) {
         auto *nav = navigation[i];
-        const QString label = t(keys[i]);
-        nav->setText(sidebarExpanded ? nav->fontMetrics().elidedText(label, Qt::ElideRight, 146).replace("&", "&&") : QString());
-        nav->setToolButtonStyle(sidebarExpanded ? Qt::ToolButtonTextBesideIcon : Qt::ToolButtonIconOnly);
+        const QString label = t(pageKeys[i]);
+        nav->setText(label);
         nav->setToolTip(label);
         nav->setAccessibleName(label);
-        nav->setChecked(pages->currentIndex() == i);
+        nav->setChecked(current == i);
     }
+    updateSidebarWidth(animate);
+}
+void MainWindow::updateSidebarWidth(bool animate) {
+    if (!sidebarMotion || !centralWidget())
+        return;
+
+    const auto outerMargins = sidebar->layout()->contentsMargins();
+    const auto cardMargins = navigationCard->contentsMargins() + navigationCard->layout()->contentsMargins();
+    const int cardInset = cardMargins.left() + cardMargins.right();
+    const int outerInset = outerMargins.left() + outerMargins.right();
+    int preferredWidth = preferredSidebarWidth;
+    for (const auto *nav : navigation)
+        preferredWidth = qMax(preferredWidth, outerInset + cardInset + nav->sizeHint().width());
+    const auto bodyMargins = centralWidget()->layout()->contentsMargins();
+    const int available = width() - bodyMargins.left() - bodyMargins.right();
+    // 小視窗保留頁面操作所需空間，必要時由導覽文字換行。
+    const int limit = qMax(compactSidebarWidth, available - compactContentWidth);
+    const int expandedWidth = qMin(preferredWidth, limit);
+    navigationCard->setFixedWidth(expandedWidth - outerInset);
+    for (auto *nav : navigation)
+        nav->setFixedHeight(nav->heightForWidth(expandedWidth - outerInset - cardInset));
+
+    const int target = sidebarExpanded ? expandedWidth : 0;
+    const bool running = sidebarMotion->state() == QAbstractAnimation::Running;
+    if (running && sidebarMotion->endValue().toInt() == target)
+        return;
+    sidebarMotion->stop();
+    if ((animate || running) && isVisible() && sidebar->width() != target) {
+        const int start = sidebar->width();
+        sidebar->show();
+        {
+            const QSignalBlocker blocker(sidebarMotion);
+            sidebarMotion->setStartValue(start);
+            sidebarMotion->setEndValue(target);
+        }
+        sidebarMotion->start();
+    } else {
+        sidebar->setFixedWidth(target);
+        sidebar->setVisible(sidebarExpanded);
+    }
+}
+bool MainWindow::event(QEvent *event) {
+    const bool handled = QMainWindow::event(event);
+    if (event->type() == QEvent::Resize || event->type() == QEvent::FontChange ||
+        event->type() == QEvent::DevicePixelRatioChange)
+        updateSidebarWidth();
+    return handled;
 }
 void MainWindow::navigate(int index) {
     if (index != pages->currentIndex() && !resolveDraft()) { updateSidebar(); return; }

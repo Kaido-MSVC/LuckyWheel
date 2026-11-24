@@ -3,12 +3,14 @@ param(
     [string]$OutputDir = (Join-Path $PSScriptRoot 'packages'),
     [string]$NsisRoot = 'C:\Program Files (x86)\NSIS',
     [switch]$SkipBuild,
+    [switch]$PortableOnly,
     [switch]$Validation,
     [switch]$Candidate,
     [switch]$Refresh
 )
 $ErrorActionPreference = 'Stop'
-if (!(Test-Path (Join-Path $NsisRoot 'makensis.exe'))) { throw 'NSIS not found; no dependencies will be installed.' }
+if (!$PortableOnly -and !(Test-Path (Join-Path $NsisRoot 'makensis.exe'))) { throw 'NSIS not found; no dependencies will be installed.' }
+if ($PortableOnly -and $Validation) { throw '-Validation applies to the installer; use -Candidate for a local Portable ZIP.' }
 if (!$SkipBuild) {
     $env:LW_BUILD_DIR = $BuildDir
     & (Join-Path $PSScriptRoot 'build.cmd')
@@ -31,11 +33,12 @@ $output = Join-Path $OutputDir "LuckyWheel-$Version-Windows-x64-Setup$suffix.exe
 $portable = Join-Path $OutputDir "LuckyWheel-$Version-Windows-x64-Portable$suffix.zip"
 $sourceZip = Join-Path $OutputDir "LuckyWheel-$Version-source.zip"
 $hashFile = Join-Path $OutputDir 'SHA256SUMS.txt'
-foreach ($target in @($output,$portable,$sourceZip,$hashFile)) {
+$targets = @($portable,$sourceZip,$hashFile)
+if (!$PortableOnly) { $targets += $output }
+foreach ($target in $targets) {
     if (Test-Path -LiteralPath $target) {
         if (!$Refresh) { throw "Refusing to overwrite existing deliverable: $target" }
         if ([IO.Path]::GetDirectoryName([IO.Path]::GetFullPath($target)) -ne $OutputDir) { throw 'Unsafe refresh path.' }
-        Remove-Item -LiteralPath $target -Force
     }
 }
 # Source is delivered physically inside both Portable and Setup, not by future promise.
@@ -45,9 +48,11 @@ Add-Type -AssemblyName System.IO.Compression
 $sourceArchive = [IO.Compression.ZipFile]::OpenRead($thirdPartySource)
 try {
     $provenance = Get-Content -LiteralPath (Join-Path $PSScriptRoot 'licenses\source-provenance.json') -Raw | ConvertFrom-Json
+    if ($provenance.applicationVersion -ne $Version) { throw 'Source provenance version does not match the build.' }
     foreach ($source in $provenance.sources) {
         $entry = $sourceArchive.GetEntry('sources/' + $source.file)
         if (!$entry) { throw "Missing source archive: $($source.file)" }
+        if ($entry.Length -ne $source.bytes) { throw "Source archive size mismatch: $($source.file)" }
         $stream = $entry.Open()
         $sha = [Security.Cryptography.SHA256]::Create()
         try { $actual = [Convert]::ToHexString($sha.ComputeHash($stream)).ToLowerInvariant() }
@@ -69,53 +74,86 @@ try {
         if ($inside -ne (Get-Content -LiteralPath $file.FullName -Raw)) { throw "Stale build information: $($file.Name)" }
     }
 } finally { $sourceArchive.Dispose() }
-$payload = Join-Path $BuildDir 'dist'
-if (![IO.Directory]::Exists($payload)) { throw 'Missing deployed payload.' }
+$deployed = Join-Path $BuildDir 'dist'
+if (![IO.Directory]::Exists($deployed)) { throw 'Missing deployed payload.' }
 $builtExe = Join-Path $BuildDir 'LuckyWheel.exe'
 if (!(Test-Path -LiteralPath $builtExe) -or
     (Get-FileHash -LiteralPath $builtExe -Algorithm SHA256).Hash -ne
-    (Get-FileHash -LiteralPath (Join-Path $payload 'LuckyWheel.exe') -Algorithm SHA256).Hash) {
+    (Get-FileHash -LiteralPath (Join-Path $deployed 'LuckyWheel.exe') -Algorithm SHA256).Hash) {
     throw 'Payload executable does not match the current build. Redeploy before packaging.'
 }
 $termsBytes = [IO.File]::ReadAllBytes((Join-Path $PSScriptRoot 'licenses\END-USER-TERMS.txt'))
 if ($termsBytes.Length -lt 3 -or $termsBytes[0] -ne 239 -or $termsBytes[1] -ne 187 -or $termsBytes[2] -ne 191) {
     throw 'NSIS license text must have a UTF-8 BOM.'
 }
-$exeVersion = (Get-Item -LiteralPath (Join-Path $payload 'LuckyWheel.exe')).VersionInfo.ProductVersion
+$exeVersion = (Get-Item -LiteralPath (Join-Path $deployed 'LuckyWheel.exe')).VersionInfo.ProductVersion
 if ($exeVersion -ne $Version) { throw "Payload version $exeVersion differs from CMake version $Version." }
 foreach ($required in @('LuckyWheel.exe','Qt6Core.dll','Qt6Sql.dll','msvcp140.dll','vcruntime140.dll','vcruntime140_1.dll','platforms\qwindows.dll','sqldrivers\qsqlite.dll')) {
-    if (!(Test-Path (Join-Path $payload $required))) { throw "Missing deployed dependency: $required" }
+    if (!(Test-Path (Join-Path $deployed $required) -PathType Leaf)) { throw "Missing deployed dependency: $required" }
 }
 foreach ($license in @('LGPL-3.0.txt','GPL-3.0.txt','LGPL-2.1.txt','THIRD-PARTY-NOTICES.txt','Qt-Translations-BSD-3-Clause.txt','SOURCE-DELIVERY.md','source-provenance.json','Microsoft-SDK-LICENSE.rtf','Microsoft-SDK-THIRD-PARTY-NOTICES.rtf','MICROSOFT-REDIST.md','END-USER-TERMS.txt','Microsoft-VS2026-Community-LICENSE.txt')) {
     if (!(Test-Path (Join-Path $PSScriptRoot "licenses\$license"))) { throw "Missing license file: $license" }
 }
-if (Test-Path (Join-Path $payload 'Qt6Pdf.dll')) { throw 'Unused Qt PDF module found in payload; rebuild with build.cmd.' }
-# Replace rather than merge so a second run cannot nest licenses\licenses or keep removed files.
+$expected = @{ 'LuckyWheel.exe' = (Get-FileHash -LiteralPath $builtExe).Hash }
+foreach ($binary in $provenance.binaries) {
+    if ($binary.file -notmatch '^(?:[A-Za-z0-9_-]+/)?[A-Za-z0-9_.-]+\.dll$' -or
+        $binary.sha256 -notmatch '^[0-9a-f]{64}$' -or $expected.ContainsKey($binary.file)) {
+        throw "Invalid or duplicate binary provenance: $($binary.file)"
+    }
+    $expected[$binary.file] = $binary.sha256
+}
+if ((Get-Item -LiteralPath $deployed).Attributes -band [IO.FileAttributes]::ReparsePoint) {
+    throw 'Unsafe deployment directory.'
+}
+$inventory = @(Get-ChildItem -LiteralPath $deployed -Recurse -Force)
+foreach ($entry in $inventory) {
+    if ($entry.Attributes -band [IO.FileAttributes]::ReparsePoint) { throw 'Reparse point in deployment.' }
+    if ($entry.PSIsContainer) { continue }
+    $relative = [IO.Path]::GetRelativePath($deployed, $entry.FullName).Replace('\','/')
+    if (!$expected.ContainsKey($relative)) { throw "Unexpected deployment file: $relative" }
+}
+$payload = Join-Path $BuildDir ("package-payload-" + [Guid]::NewGuid().ToString('N'))
+New-Item -ItemType Directory -Path $payload | Out-Null
+foreach ($relative in $expected.Keys) {
+    $from = Join-Path $deployed $relative
+    $to = Join-Path $payload $relative
+    New-Item -ItemType Directory -Force ([IO.Path]::GetDirectoryName($to)) | Out-Null
+    Copy-Item -LiteralPath $from -Destination $to
+    if ((Get-FileHash -LiteralPath $to -Algorithm SHA256).Hash -ne $expected[$relative]) {
+        throw "Deployment hash mismatch: $relative"
+    }
+}
 $payloadSources = Join-Path $payload 'sources'
 New-Item -ItemType Directory -Force $payloadSources | Out-Null
 Copy-Item -LiteralPath $thirdPartySource -Destination (Join-Path $payloadSources ([IO.Path]::GetFileName($thirdPartySource))) -Force
-$payloadLicenses = [IO.Path]::GetFullPath((Join-Path $payload 'licenses'))
-if ([IO.Path]::GetDirectoryName($payloadLicenses) -ne $payload -or ((Get-Item -LiteralPath $payloadLicenses -ErrorAction SilentlyContinue).Attributes -band [IO.FileAttributes]::ReparsePoint)) { throw 'Unsafe licenses directory.' }
-if (Test-Path $payloadLicenses) { Remove-Item -LiteralPath $payloadLicenses -Recurse -Force }
+$payloadLicenses = Join-Path $payload 'licenses'
 Copy-Item (Join-Path $PSScriptRoot 'licenses') $payloadLicenses -Recurse -Force
 Copy-Item (Join-Path $PSScriptRoot 'THIRD-PARTY.md') $payload -Force
 Copy-Item $statusFile $payload -Force
 Copy-Item (Join-Path $PSScriptRoot 'LICENSE') (Join-Path $payload 'LICENSE.txt') -Force
 New-Item -ItemType Directory -Force $OutputDir | Out-Null
-$manifest = Join-Path $BuildDir 'uninstall-files.nsh'
-$lines = @(Get-ChildItem -LiteralPath $payload -File -Recurse | ForEach-Object {
-    $relative = $_.FullName.Substring($payload.Length).TrimStart('\')
-    'Delete "$INSTDIR\' + $relative + '"'
-})
-$lines += @(Get-ChildItem -LiteralPath $payload -Directory -Recurse | Sort-Object { $_.FullName.Length } -Descending | ForEach-Object {
-    $relative = $_.FullName.Substring($payload.Length).TrimStart('\')
-    'RMDir "$INSTDIR\' + $relative + '"'
-})
-$lines | Set-Content -LiteralPath $manifest -Encoding utf8BOM
-$nsisArgs = @("/DPAYLOAD=$payload", "/DOUTPUT=$output", "/DREMOVE_MANIFEST=$manifest", "/DVERSION=$Version")
-if ($Validation) { $nsisArgs += '/DVALIDATION' }
-& (Join-Path $NsisRoot 'makensis.exe') @nsisArgs (Join-Path $PSScriptRoot 'installer\LuckyWheel.nsi')
-if ($LASTEXITCODE) { throw 'NSIS packaging failed.' }
+foreach ($target in $targets) {
+    if (Test-Path -LiteralPath $target) {
+        if (!$Refresh) { throw "Refusing to overwrite existing deliverable: $target" }
+        Remove-Item -LiteralPath $target -Force
+    }
+}
+if (!$PortableOnly) {
+    $manifest = Join-Path $BuildDir 'uninstall-files.nsh'
+    $lines = @(Get-ChildItem -LiteralPath $payload -File -Recurse | ForEach-Object {
+        $relative = $_.FullName.Substring($payload.Length).TrimStart('\')
+        'Delete "$INSTDIR\' + $relative + '"'
+    })
+    $lines += @(Get-ChildItem -LiteralPath $payload -Directory -Recurse | Sort-Object { $_.FullName.Length } -Descending | ForEach-Object {
+        $relative = $_.FullName.Substring($payload.Length).TrimStart('\')
+        'RMDir "$INSTDIR\' + $relative + '"'
+    })
+    $lines | Set-Content -LiteralPath $manifest -Encoding utf8BOM
+    $nsisArgs = @("/DPAYLOAD=$payload", "/DOUTPUT=$output", "/DREMOVE_MANIFEST=$manifest", "/DVERSION=$Version")
+    if ($Validation) { $nsisArgs += '/DVALIDATION' }
+    & (Join-Path $NsisRoot 'makensis.exe') @nsisArgs (Join-Path $PSScriptRoot 'installer\LuckyWheel.nsi')
+    if ($LASTEXITCODE) { throw 'NSIS packaging failed.' }
+}
 Compress-Archive -Path (Join-Path $payload '*') -DestinationPath $portable
 # Source archive uses an allowlist rather than recursively collecting the workspace.
 $rootFiles = @('.gitignore','.clang-format','CMakeLists.txt','CMakePresets.json','build.cmd','package.ps1',
@@ -138,7 +176,8 @@ try {
             [IO.Compression.CompressionLevel]::Optimal) | Out-Null
     }
 } finally { $archive.Dispose() }
-$deliverables = @($output,$portable,$sourceZip)
+$deliverables = @($portable,$sourceZip)
+if (!$PortableOnly) { $deliverables += $output }
 $thirdPartySource = Join-Path $OutputDir "LuckyWheel-$Version-third-party-sources.zip"
 if (Test-Path -LiteralPath $thirdPartySource) { $deliverables += $thirdPartySource }
 $hashes = @(Get-FileHash -Algorithm SHA256 -LiteralPath $deliverables)

@@ -343,6 +343,7 @@ class CoreTests : public QObject {
         QString backup = dir.filePath("backup.sqlite");
         QVERIFY2(s.backup(backup, &e), qPrintable(e));
         QVERIFY(!s.backup(backup, &e));
+        QCOMPARE(e, QString("backup_exists"));
         QVERIFY(s.draw(c, sample(c, 0), "Miss", nullptr, &e));
         QCOMPARE(s.history(&e).size(), 2);
         e.clear();
@@ -355,6 +356,62 @@ class CoreTests : public QObject {
         bad.close();
         e.clear();
         QVERIFY(!s.restore(bad.fileName(), &e));
+        QCOMPARE(s.history(&e).size(), 1);
+
+        QFile empty(dir.filePath("reserved.sqlite"));
+        QVERIFY(empty.open(QIODevice::WriteOnly));
+        empty.close();
+        QVERIFY(!s.backup(empty.fileName(), &e));
+        QCOMPARE(e, QString("backup_exists"));
+        QCOMPARE(empty.size(), 0);
+
+        const auto foreign = dir.filePath("other-schema.sqlite");
+        QVERIFY(QFile::copy(backup, foreign));
+        {
+            auto source = QSqlDatabase::addDatabase("QSQLITE", "backup-schema-test");
+            source.setDatabaseName(foreign);
+            QVERIFY(source.open());
+            QSqlQuery q(source);
+            QVERIFY(q.exec("SELECT sqlite_version()"));
+            QVERIFY(q.next());
+            qInfo() << "QSQLITE SQLite" << q.value(0).toString();
+            QVERIFY(q.exec("CREATE VIEW saved_history AS SELECT id FROM history"));
+        }
+        QSqlDatabase::removeDatabase("backup-schema-test");
+        const auto previous = lw::toJson(s.load(&e));
+        QVERIFY(!s.restore(foreign, &e));
+        QCOMPARE(e, QString("invalid_backup"));
+        QCOMPARE(lw::toJson(s.load(&e)), previous);
+        QCOMPARE(s.history(&e).size(), 1);
+
+        const auto truncated = dir.filePath("truncated.sqlite");
+        QVERIFY(QFile::copy(backup, truncated));
+        QFile incomplete(truncated);
+        QVERIFY(incomplete.open(QIODevice::ReadWrite));
+        QVERIFY(incomplete.resize(incomplete.size() / 2));
+        incomplete.close();
+        QVERIFY(!s.restore(truncated, &e));
+        QCOMPARE(e, QString("invalid_backup"));
+
+        const auto invalidHistory = dir.filePath("invalid-history.sqlite");
+        QVERIFY(QFile::copy(backup, invalidHistory));
+        {
+            auto source = QSqlDatabase::addDatabase("QSQLITE", "backup-history-test");
+            source.setDatabaseName(invalidHistory);
+            QVERIFY(source.open());
+            QSqlQuery q(source);
+            QVERIFY(q.exec("UPDATE history SET ticket='invalid ticket'"));
+        }
+        QSqlDatabase::removeDatabase("backup-history-test");
+        QFile fixture(invalidHistory);
+        QVERIFY(fixture.open(QIODevice::ReadOnly));
+        const auto original = fixture.readAll();
+        fixture.close();
+        QVERIFY(!s.restore(invalidHistory, &e));
+        QCOMPARE(e, QString("invalid_backup"));
+        QVERIFY(fixture.open(QIODevice::ReadOnly));
+        QCOMPARE(fixture.readAll(), original);
+        QCOMPARE(lw::toJson(s.load(&e)), previous);
         QCOMPARE(s.history(&e).size(), 1);
     }
     void randomDistribution() {

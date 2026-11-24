@@ -76,6 +76,9 @@ inline QString uiText(const QString &key, const QString &lang) {
         {"spin", "開始抽獎|开始抽奖|Draw|抽選開始|추첨 시작|Sortear|Tirer|Drehen|Sortear"},
         {"ready", "準備開始|准备开始|Ready|準備完了|준비 완료|Listo|Prêt|Bereit|Pronto"},
         {"spinning", "轉動中…|转动中…|Spinning…|回転中…|회전 중…|Girando…|En rotation…|Dreht sich…|Girando…"},
+        {"drawStatus", "抽獎狀態|抽奖状态|Draw status|抽選状況|추첨 상태|Estado del sorteo|État du tirage|Ziehungsstatus|Estado do sorteio"},
+        {"drawWon", "中獎|中奖|Prize won|当選|당첨|Premio ganado|Lot gagné|Gewinn|Prêmio ganho"},
+        {"prizeOdds", "獎品機率|奖品概率|Prize odds|賞品の確率|상품별 확률|Probabilidad de premios|Probabilité des lots|Gewinnchancen|Probabilidade dos prêmios"},
         {"miss", "未中獎|未中奖|No prize|はずれ|미당첨|Sin premio|Sans lot|Kein Gewinn|Sem prêmio"},
         {"sold", "售罄|售罄|Sold out|品切れ|소진|Agotado|Épuisé|Ausverkauft|Esgotado"},
         {"showSold", "顯示售罄區塊（計入未中獎）|显示售罄区块（计入未中奖）|Show sold-out slices (no "
@@ -127,6 +130,7 @@ inline QString uiText(const QString &key, const QString &lang) {
         {"theme", "外觀|外观|Theme|テーマ|테마|Tema|Thème|Darstellung|Tema"},
         {"light", "明亮|明亮|Light|ライト|밝게|Claro|Clair|Hell|Claro"},
         {"dark", "深色|深色|Dark|ダーク|어둡게|Oscuro|Sombre|Dunkel|Escuro"},
+        {"systemTheme", "跟隨系統|跟随系统|Follow system|システム設定に従う|시스템 설정 따르기|Usar configuración del sistema|Suivre le système|Systemeinstellung verwenden|Seguir o sistema"},
         {"fullscreen", "切換全螢幕（F11）|切换全屏（F11）|Toggle fullscreen (F11)|全画面切替（F11）|전체 "
                        "화면 전환 (F11)|Pantalla completa (F11)|Plein écran (F11)|Vollbild umschalten "
                        "(F11)|Alternar tela cheia (F11)"},

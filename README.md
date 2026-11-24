@@ -1,36 +1,33 @@
-# LuckyWheel v2.0.9 — Windows x64
+# LuckyWheel v2.1.0 — Windows x64
 
 ## English overview
 
-**LuckyWheel v2.0.9** is an offline Windows x64 prize-drawing wheel built with C++17 and Qt Widgets. It supports configurable prizes and probabilities, inventory limits, drawing history, CSV import/export, JSON configurations, persistent SQLite storage, backups and restoration, sound effects, confetti, light/dark themes, and a separate probability simulator. Each outcome is selected and recorded before the wheel animation displays it.
+**LuckyWheel v2.1.0** is an offline Windows x64 prize-drawing wheel built with C++23 and Qt Widgets. It has collapsible navigation, a redesigned wheel and draw console, and light, dark, and system themes. Each outcome is selected and recorded before the wheel animation displays it. [v2.1.0 release notes](RELEASE-NOTES-v2.1.0.md)
 
 The interface supports **nine languages**: Traditional Chinese, Simplified Chinese, English, Japanese, Korean, Spanish, French, German, and Portuguese. On first launch it follows supported Windows display-language preferences, falling back to English. Manual language selections are saved across restarts.
 
 When a prize runs out, its probability becomes part of the no-prize outcome; the probabilities of other prizes do not increase. The settings password lock helps prevent accidental changes but **does not encrypt the local database**.
 
-Download the [v2.0.9 installer or portable ZIP](https://github.com/Kaido-MSVC/LuckyWheel/releases/tag/v2.0.9). Extract the complete package and retain bundled libraries, license notices and distribution files. The program works offline. The project's own code is MIT-licensed; third-party components retain separate terms, including Microsoft component terms presented for acceptance on first launch. See the Chinese documentation below for the complete drawing rules and limitations.
+Extract the complete v2.1.0 Portable ZIP and retain the bundled libraries, license notices and source archive. The program works offline. The project's own code is MIT-licensed. Third-party components retain separate terms, including Microsoft component terms presented for acceptance on first launch. [Download Windows x64 Portable](https://github.com/Kaido-MSVC/LuckyWheel/releases/download/v2.1.0/LuckyWheel-2.1.0-Windows-x64-Portable.zip)
 
 
-Qt Widgets 幸運轉盤，支援獎品庫存、歷史紀錄、CSV／JSON 與九語介面。目前開發中的原始碼使用 C++23。
-v2.0.9 修正首次啟動語言選擇及高 DPI／捲動／文字顯示，包含第三方授權通知與完整來源交付。
+Qt Widgets 幸運轉盤，支援獎品庫存、歷史紀錄、CSV／JSON 與九語介面。
+v2.1.0 使用 C++23，重新配置轉盤與抽獎控制台，提供可完全收合的導覽及跟隨系統外觀。
+本版使用 Qt 6.12.1 官方 QSQLITE 驅動程式，內含 SQLite 3.54.1 的安全修正。
 
-**發布狀態：原始碼已公開，正式下載見 [GitHub Release v2.0.9](https://github.com/Kaido-MSVC/LuckyWheel/releases/tag/v2.0.9)。**
-見 [RELEASE-STATUS.md](RELEASE-STATUS.md) 的持續義務與驗證範圍。
+v2.1.0 提供 Windows x64 免安裝版與對應原始碼。 [正式發布頁](https://github.com/Kaido-MSVC/LuckyWheel/releases/tag/v2.1.0) · [版本說明](RELEASE-NOTES-v2.1.0.md) · [驗證範圍](RELEASE-STATUS.md)
 
 ## 取得與執行
 
-- 安裝版：[LuckyWheel-2.0.9-Windows-x64-Setup.exe](https://github.com/Kaido-MSVC/LuckyWheel/releases/download/v2.0.9/LuckyWheel-2.0.9-Windows-x64-Setup.exe)。
-- 免安裝版：完整解壓 [LuckyWheel-2.0.9-Windows-x64-Portable.zip](https://github.com/Kaido-MSVC/LuckyWheel/releases/download/v2.0.9/LuckyWheel-2.0.9-Windows-x64-Portable.zip)，開啟根目錄的 `LuckyWheel.exe`。
-- 原始碼：[LuckyWheel-2.0.9-source.zip](https://github.com/Kaido-MSVC/LuckyWheel/releases/download/v2.0.9/LuckyWheel-2.0.9-source.zip)，不含 runtime、build、packages、歷史驗證紀錄或舊網頁版。
+- 完整解壓 ZIP 後，開啟根目錄的 `LuckyWheel.exe`。 [Windows x64 免安裝版](https://github.com/Kaido-MSVC/LuckyWheel/releases/download/v2.1.0/LuckyWheel-2.1.0-Windows-x64-Portable.zip)
+- 建置或查閱本版原始碼請使用對應的來源附件。 [應用程式來源 ZIP](https://github.com/Kaido-MSVC/LuckyWheel/releases/download/v2.1.0/LuckyWheel-2.1.0-source.zip) · [第三方來源 ZIP](https://github.com/Kaido-MSVC/LuckyWheel/releases/download/v2.1.0/LuckyWheel-2.1.0-third-party-sources.zip)
 - 建置目前的原始碼請執行 `build.cmd`，完成後開啟 `build-cpp23/dist/LuckyWheel.exe`。詳見 [BUILD.md](BUILD.md)。
 
-第三方來源：[LuckyWheel-2.0.9-third-party-sources.zip](https://github.com/Kaido-MSVC/LuckyWheel/releases/download/v2.0.9/LuckyWheel-2.0.9-third-party-sources.zip)。
-檔案核對：[SHA256SUMS.txt](https://github.com/Kaido-MSVC/LuckyWheel/releases/download/v2.0.9/SHA256SUMS.txt)。程式與安裝包尚未簽章。
-安裝版和免安裝版均需保留 DLL、外掛、licenses 與發布狀態文件；不必另行安裝 Qt。
+SHA-256 可用於核對下載檔案。LuckyWheel 主程式目前未簽章。請保留 DLL、Qt 外掛、`licenses/` 和 `sources/`。 [SHA256SUMS.txt](https://github.com/Kaido-MSVC/LuckyWheel/releases/download/v2.1.0/SHA256SUMS.txt)
 
 資料預設位於 `%LOCALAPPDATA%/LuckyWheel/LuckyWheel/`，程式離線工作。
 如需隔離資料，可執行 `LuckyWheel.exe --data-dir "D:\LuckyWheelData"`。
-安裝、升級、備份與解除安裝說明見 [INSTALL.md](INSTALL.md)。
+免安裝版使用方式、升級及備份流程見 [INSTALL.md](INSTALL.md)。
 
 ## 功能
 
@@ -46,7 +43,8 @@ v2.0.9 修正首次啟動語言選擇及高 DPI／捲動／文字顯示，包含
 - 中獎與未中獎音效、音量／靜音，中獎彩紙效果。
 - 九語：繁中、簡中、英、日、韓、西班牙、法、德、葡萄牙。首次啟動依 Windows 介面語言偏好選擇支援語言，無支援時回退英文；手動選擇會保存並優先沿用，既有配置不被系統語言覆蓋。
 - CSV 批次匯入與確認前預覽、歷史 CSV 匯出、JSON 配置檔。
-- 一致性資料庫備份、還原前自動安全備份、明亮／深色外觀。
+- 一致性資料庫備份、還原前自動安全備份、淺色／深色／跟隨系統外觀。
+- 收合導覽時主畫面自動補滿。展開寬度配合各語言文字，小視窗會讓較長文字換行。
 - 全螢幕按 F11，Esc 離開全螢幕。檔案或確認對話方塊開啟時，Esc 會先取消該對話方塊。
 - 歷史統計；獨立機率模擬最多 100 萬次，不扣正式庫存、不寫正式紀錄。
 - 設定密碼鎖定；鎖定時仍可抽獎、查看與匯出紀錄、備份及模擬。
@@ -61,13 +59,13 @@ v2.0.9 修正首次啟動語言選擇及高 DPI／捲動／文字顯示，包含
 
 例如 A=10%、B=20%，未中獎=70%；A 售罄後 B 仍為20%，未中獎=80%。顯示售罄時 A 的10%灰色區塊屬於未中獎；隱藏時 B 的面積仍為20%，未中獎面積為80%。
 
-按下開始時即抽取一次並交易保存，接著播放約3.2秒動畫，在對應區塊中心停下，保留結果約1.6秒。這段時間使用該次抽獎前的機率快照，禁止重複抽獎與修改配置。結果展示結束後轉盤回到下一次可抽的機率畫面，文字標示「上次結果」。
+按下開始時即抽取一次並交易保存，接著播放約 3.2 秒動畫，在對應區塊中心停下，保留結果約 1.6 秒。這段時間使用該次抽獎前的機率快照，抽獎與獎品編輯會暫停。結果展示結束後，轉盤回到下一次可抽的機率畫面，控制台保留結果。
 
 因此動畫途中關閉或當機不會重新抽取或退回庫存：結果已保留於歷史。若資料庫交易失敗，不扣庫存、不新增紀錄、不播放成功動畫。
 
 ## CSV 與配置
 
-匯入 CSV 為 UTF-8，固定四欄：
+匯入 CSV 為 UTF-8，支援既有四欄，也可在末尾加上 `remaining` 欄保存剩餘數量。
 
 ```csv
 name,probability,limit,color
@@ -75,7 +73,7 @@ name,probability,limit,color
 二獎,9.0000,5,#70c1ff
 ```
 
-見 `examples/prizes.csv`。可使用雙引號包住含逗號或引號的欄位；名稱不能換行。匯入先驗證與預覽，確認後取代獎品設定，數量從總數開始，歷史保留。
+見 `examples/prizes.csv`。可使用雙引號包住含逗號或引號的欄位，名稱不能換行。匯入先驗證與預覽，確認後取代獎品設定並保留歷史。省略 `remaining` 時，剩餘數量以總數為準。
 
 JSON 保存完整配置與當時剩餘數量；匯出不包含設定鎖密碼。載入 JSON 會保留目前輪次及設定鎖，替換其他配置與庫存。JSON 與 CSV 匯入檔案上限2 MiB。
 
@@ -106,6 +104,7 @@ Microsoft 元件條款限於指定 DLL；首次啟動需明確同意。每份 Po
 
 ## 版本變更紀錄
 
+- [v2.1.0 版本說明](RELEASE-NOTES-v2.1.0.md)
 - [v2.0.9](CHANGELOG-v2.0.9.md)
 - [v2.0.8](CHANGELOG-v2.0.8.md)
 - [v2.0.7](CHANGELOG-v2.0.7.md)

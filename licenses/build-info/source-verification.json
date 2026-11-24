@@ -1,88 +1,380 @@
 {
-  "archives": [
-    {
-      "file": "qtmultimedia-everywhere-src-6.12.0.tar.xz",
-      "sha256": "3143f53b64257ba2a0685c940f5dce476c75871ff86b516de45cfd54ea93a62d",
-      "bytes": 10544184
-    },
-    {
-      "file": "qtimageformats-everywhere-src-6.12.0.tar.xz",
-      "sha256": "0943132b5db8de6b6a7f1d162682173e8763c7ed94e80fd39113292845f67762",
-      "bytes": 1848620
-    },
-    {
-      "file": "qttranslations-everywhere-src-6.12.0.tar.xz",
-      "sha256": "85929c0c30d6f273f23bd879bb69803ea17b010ab73cab2f8abf95357f6f6bbb",
-      "bytes": 1745884
-    },
-    {
-      "file": "ffmpeg-9.0.1.tar.gz",
-      "sha256": "657dbf258cce6c0681714b6e40b8ca69e988c67ecfc2f7aab47574e6ebaceb38",
-      "bytes": 18122748
-    },
-    {
-      "file": "zlib-1.3.1.tar.gz",
-      "sha256": "9a93b2b7dfdac77ceba5a558a580e74667dd6fede4585b91eefb60f03b72df23",
-      "bytes": 1512791
-    },
-    {
-      "file": "qtbase-025bdad181de241e81bf853c8a2d7bf3d19261a9.tar.gz",
-      "sha256": "5045b90abc04c9403aedb2e44e1c696bf047930a6a6ca49d7242a0c139453978",
-      "bytes": 68727748
-    },
-    {
-      "file": "qtsvg-883a58532078d003cefef0a549bfe9f885ce41f5.tar.gz",
-      "sha256": "a9f1f4d8b16ec54e2bbe96cfd2b5bcdaa153932275aa94fb76294c2d85ed3847",
-      "bytes": 2629476
-    },
-    {
-      "file": "qt5-build-recipes-ef25002ed292b132d1ed3246bfcee1d24a9cd966.tar.gz",
-      "sha256": "bd178691618f3b89b16043016c82de522be616bc99e6a8ec1c3ce48000dadef8",
-      "bytes": 658766
-    }
-  ],
-  "modules": [
-    {
-      "module": "qtmultimedia",
-      "sourceSbomRecords": 3149,
-      "matched": 587,
-      "matchedAfterWindowsCRLF": 2562,
-      "missing": [],
-      "different": [],
-      "supplementedGitControlFiles": 0
-    },
-    {
-      "module": "qtimageformats",
-      "sourceSbomRecords": 508,
-      "matched": 102,
-      "matchedAfterWindowsCRLF": 406,
-      "missing": [],
-      "different": [],
-      "supplementedGitControlFiles": 0
-    },
+  "qtModules": [
     {
       "module": "qtbase",
-      "sourceSbomRecords": 23144,
-      "matched": 6974,
-      "matchedAfterWindowsCRLF": 16131,
-      "missing": [],
-      "different": [],
-      "supplementedGitControlFiles": 38,
-      "metadataDifference": "Resolved: .gitattributes declares .tag export-subst; archive substitutes the commit for $Format:%H$. Original .tag is supplied in supplement and matches source-SBOM SHA1 after Windows CRLF checkout.",
-      "supplementedExportSubstFiles": 1
+      "archive": "qtbase-everywhere-src-6.12.1.tar.xz",
+      "url": "https://download.qt.io/official_releases/qt/6.12/6.12.1/submodules/qtbase-everywhere-src-6.12.1.tar.xz",
+      "sha256": "cd837bb9fd631e20439a04eaa0c2f252f19ad92fdf5adf10229d0fbc2fab2d53",
+      "bytes": 51507200,
+      "sourceCommit": "5af1a37e31a869cd6eb8a73d82e2c71a450e6634",
+      "vendorSha256Matched": true,
+      "sourceSbomEntries": 23291,
+      "byteMatches": 6981,
+      "checkoutMatches": 16271,
+      "missing": {
+        ".gitattributes": "53f6787d4ea2099b16faa773101265f17b6d7d0e",
+        ".gitignore": "5a6fb197e09548b0a536867eb5f6512f90f718c6",
+        "config.tests/.gitignore": "29f6c8589122309f1adafe026aeddab87d431a70",
+        "src/3rdparty/.gitattributes": "3b318f71067b36580ff8a9bbcc4882698ac5a821",
+        "src/3rdparty/tinycbor/.gitignore": "c53c52b3a379eefc26cce99b2a07faca59801865",
+        "src/3rdparty/tinycbor/tests/.gitignore": "fa03c5f400b6b8cbecab4e0d0f28a8bc4d7b0a19",
+        "src/android/jar/.gitignore": "ee1dba706af5173a6f6a81d82ba7d6df1ab7711c",
+        "src/android/templates/.gitignore": "bfe21cdac4ccd4379e4b93bc5d30e064b1662f43",
+        "src/android/templates_aar/.gitignore": "bfe21cdac4ccd4379e4b93bc5d30e064b1662f43",
+        "src/android/templates_cmake/.gitignore": "bfe21cdac4ccd4379e4b93bc5d30e064b1662f43",
+        "src/corelib/serialization/.gitignore": "59ba17633238eec2367b6edd3f790adb55545d63",
+        "src/network/android/jar/.gitignore": "ee1dba706af5173a6f6a81d82ba7d6df1ab7711c",
+        "src/plugins/networkinformation/android/jar/.gitignore": "ee1dba706af5173a6f6a81d82ba7d6df1ab7711c",
+        "tests/auto/cmake/test_qt_extract_metatypes/test_qt_extract_metatypes_project/testdata/.gitattributes": "dbc8489e85547cd1faaae8469265423c8041048b",
+        "tests/auto/corelib/io/qfile/.gitattributes": "5d7250cbcfd032d0b25bbdaf289e4529abce9753",
+        "tests/auto/corelib/io/qresourceengine/.gitattributes": "49eb64a3d647f0a86a01d8aecede3bdfe503aafa",
+        "tests/auto/corelib/io/qsettings/.gitattributes": "7091b2673b53c78f9016dc14beba6b795ab14248",
+        "tests/auto/corelib/io/qzip/.gitignore": "e99b324a11a364690ca170aca9d58016f9352f07",
+        "tests/auto/corelib/plugin/qpluginloader/elftest/.gitattributes": "63edbe3b9624dd7cd9946eb0d18a678ddf95be3e",
+        "tests/auto/corelib/serialization/qtextstream/.gitattributes": "0e37107ce59fd937b098a5fd78e6637915117185",
+        "tests/auto/corelib/serialization/qxmlstream/.gitattributes": "1396de821c79017bbda8b3ca76c369f0eda4a0e2",
+        "tests/auto/corelib/text/qbytearray_large/.gitattributes": "07adfd290de6ae7c2a1bc09f57f50411dd4cdf90",
+        "tests/auto/network/access/qnetworkreply/.gitattributes": "934d1c6194aa38a36eb7e80fee453d7dad5ba17d",
+        "tests/auto/tools/moc/.gitattributes": "d22acfb48cecc61b5e11f8f07ae67bdce2857c0f",
+        "tests/auto/tools/rcc/data/.gitattributes": "61dba6ce4a6f84c15e216e7820078dcbd7494988",
+        "tests/auto/tools/uic/baseline/.gitattributes": "bddcaf9331489c4229f0e377363ebbd5cbca0d74",
+        "tests/auto/xml/dom/qdom/.gitattributes": "08b45c327e853a477f1484e56eaadb7324cceacb",
+        "tests/testserver/apache2/.gitattributes": "093fe731b05611b766649cc903d4d20c94964139",
+        "tests/testserver/apache2/testdata/www/htdocs/rfcs/.gitattributes": "8b9f5d8a9499e4ed45ba5136e14c6ec6415ee48b",
+        "tests/testserver/common/.gitattributes": "53c7192f8f2373e57aade0d68de76c3f9b0d340a",
+        "tests/testserver/danted/.gitattributes": "53c7192f8f2373e57aade0d68de76c3f9b0d340a",
+        "tests/testserver/ftp-proxy/.gitattributes": "53c7192f8f2373e57aade0d68de76c3f9b0d340a",
+        "tests/testserver/squid/.gitattributes": "53c7192f8f2373e57aade0d68de76c3f9b0d340a",
+        "tests/testserver/vsftpd/.gitattributes": "093fe731b05611b766649cc903d4d20c94964139",
+        "util/gradientgen/.gitignore": "891b44829fb28b991f6502c35526c361e5a9a09f",
+        "util/sbom/cyclonedx/.gitignore": "453c2791963e238c43eac40361bd5436cff2ded6",
+        "util/unicode/.gitattributes": "4f26ad018b1798a59a093318808070758d109571",
+        "util/x86simdgen/.gitignore": "516408ef46336460a5340a78df92d3a149fc993b"
+      },
+      "mismatched": {
+        ".tag": "8eb01c346a92a2321c358ae8327d3b48c163b1b0"
+      },
+      "sqlite": {
+        "src/3rdparty/sqlite/sqlite3.c": {
+          "sha256": "0c657666d819f261cc4007526ad57e1669de9949df7a8ea847aa284a2bf0ee52",
+          "sha3_256": "e2b869d3003b33c942b7dd7063604fbc53553e1b66609570df39b9b7b558ee81",
+          "version": "3.54.1",
+          "sourceId": "2026-10-16 14:45:20 555e07ef33f69a0957d24d8e555b702464a131d6f1607f4c3c1e4551e8e6ca76"
+        },
+        "src/3rdparty/sqlite/sqlite3.h": {
+          "sha256": "d6c84557261893439b341d2e6c35187ae3ea24fbfd843ad94616f72d89242b8c",
+          "sha3_256": "15ef3f5dbc4a7a980f828fa0d1e473cee5a124e7bb77e9bc70fc0bfa3f9a2af8",
+          "version": "3.54.1",
+          "sourceId": "2026-10-16 14:45:20 555e07ef33f69a0957d24d8e555b702464a131d6f1607f4c3c1e4551e8e6ca76"
+        }
+      }
     },
     {
       "module": "qtsvg",
-      "sourceSbomRecords": 642,
-      "matched": 78,
-      "matchedAfterWindowsCRLF": 554,
-      "missing": [],
-      "different": [],
-      "supplementedGitControlFiles": 9,
-      "metadataDifference": "Resolved: .gitattributes declares .tag export-subst; archive substitutes the commit for $Format:%H$. Original .tag is supplied in supplement and matches source-SBOM SHA1 after Windows CRLF checkout.",
-      "supplementedExportSubstFiles": 1
+      "archive": "qtsvg-everywhere-src-6.12.1.tar.xz",
+      "url": "https://download.qt.io/official_releases/qt/6.12/6.12.1/submodules/qtsvg-everywhere-src-6.12.1.tar.xz",
+      "sha256": "6a7157a9a0556a129ae6582c7fbe57a0d6c0b83083cfcbd38d5d4a93b30c46e1",
+      "bytes": 2342960,
+      "sourceCommit": "ce2d9787bf7c6e4d9ab79b33b99ebbcfec7aef00",
+      "vendorSha256Matched": true,
+      "sourceSbomEntries": 644,
+      "byteMatches": 78,
+      "checkoutMatches": 556,
+      "missing": {
+        ".gitattributes": "d7f4162b0bba7d81de39a5a6017e5c7ad7c99ef4",
+        ".gitignore": "c54e07b997af321cc5ecaceeded22caf882be48f",
+        "tests/auto/bic/.gitignore": "e7f8b137b28dc77695970eed8b6bcbe26be7ec5d",
+        "tests/auto/qsvggenerator/.gitignore": "947d82c903eb993b18d7491ff48860705eeb6d90",
+        "tests/auto/qsvgplugin/.gitignore": "41e326d6a89b25ba4f74e8dc932ce6d22ad4479e",
+        "tests/auto/qsvgrenderer/.gitattributes": "97c0369237aa21d64f8a55f53c440854e0fab550",
+        "tests/auto/qsvgrenderer/.gitignore": "3af94099b4ea655b4094b4de0e42b6bb1fe1cdbb",
+        "tests/global/.gitignore": "351e722523893b755f9586fe58958bed4df13b71",
+        "tests/manual/rendertestsuite/.gitignore": "f3e77ae4357ef4c54854c84c5701054287413748"
+      },
+      "mismatched": {
+        ".tag": "8eb01c346a92a2321c358ae8327d3b48c163b1b0"
+      },
+      "sqlite": {}
+    },
+    {
+      "module": "qtmultimedia",
+      "archive": "qtmultimedia-everywhere-src-6.12.1.tar.xz",
+      "url": "https://download.qt.io/official_releases/qt/6.12/6.12.1/submodules/qtmultimedia-everywhere-src-6.12.1.tar.xz",
+      "sha256": "5a125bc2bede8c6512296e0f3204a9922741fd144fcae7d4a66b3c007bb125e3",
+      "bytes": 10652900,
+      "sourceCommit": "1469cb18a238c2f3c442cc1a66e75a1dbf55e717",
+      "vendorSha256Matched": true,
+      "sourceSbomEntries": 3254,
+      "byteMatches": 592,
+      "checkoutMatches": 2661,
+      "missing": {},
+      "mismatched": {
+        ".tag": "384e64d8ad2e97a8f2f952a11af8ad3f475a3e1d"
+      },
+      "sqlite": {}
+    },
+    {
+      "module": "qtimageformats",
+      "archive": "qtimageformats-everywhere-src-6.12.1.tar.xz",
+      "url": "https://download.qt.io/official_releases/qt/6.12/6.12.1/submodules/qtimageformats-everywhere-src-6.12.1.tar.xz",
+      "sha256": "20a40732228cf0734c5b2335d4a816c1cab97dcdcc6d13073c0b1065e1c6c608",
+      "bytes": 1847108,
+      "sourceCommit": "032f617fbb10c3116e1cf23b630974f9f729efd1",
+      "vendorSha256Matched": true,
+      "sourceSbomEntries": 506,
+      "byteMatches": 102,
+      "checkoutMatches": 404,
+      "missing": {},
+      "mismatched": {},
+      "sqlite": {}
     }
   ],
-  "supplementManifest": "supplement/index.json",
-  "verificationScope": "All four module source-SBOM files verified byte-for-byte or Windows checkout LF/CRLF conversion; omitted Git controls supplied separately; .tag metadata variance recorded."
+  "supplementalSources": [
+    {
+      "module": "qtbase",
+      "path": ".gitattributes",
+      "sha256": "b8bb81798fa41d66ad3fa4f5b007064f2bd3533aaf32ba9b87c4c4285efba11c"
+    },
+    {
+      "module": "qtbase",
+      "path": ".gitignore",
+      "sha256": "8955a827a97965167ba5709b6f3e90c57acdcb949d80d0dbbe7740c993eb9d91"
+    },
+    {
+      "module": "qtbase",
+      "path": "config.tests/.gitignore",
+      "sha256": "4226258154b77c5987163becc5c4b8257b02cc9c7b918b55ab9eca0da7b63b2e"
+    },
+    {
+      "module": "qtbase",
+      "path": "src/3rdparty/.gitattributes",
+      "sha256": "9553025279abf826bef778287bd9d5df9c626e071df349dd6ad210c7c5d33b86"
+    },
+    {
+      "module": "qtbase",
+      "path": "src/3rdparty/tinycbor/.gitignore",
+      "sha256": "ffe05507362cda6688da27508fd19f56c0d31e1fa39fd21530eb6b38bff52fbe"
+    },
+    {
+      "module": "qtbase",
+      "path": "src/3rdparty/tinycbor/tests/.gitignore",
+      "sha256": "03832991dabb0cbe6dd0adf50b9dd146a3032e40a5ae74111aaaf3878083a0f2"
+    },
+    {
+      "module": "qtbase",
+      "path": "src/android/jar/.gitignore",
+      "sha256": "73150826af09fb4775f251aadd215dd0b51c22ddd51e5084c9352f0bc4333c04"
+    },
+    {
+      "module": "qtbase",
+      "path": "src/android/templates/.gitignore",
+      "sha256": "fb536b9dda6de450d0aab0581de3e22645c7cb0a623a28878bc6d7970f47d7f3"
+    },
+    {
+      "module": "qtbase",
+      "path": "src/android/templates_aar/.gitignore",
+      "sha256": "fb536b9dda6de450d0aab0581de3e22645c7cb0a623a28878bc6d7970f47d7f3"
+    },
+    {
+      "module": "qtbase",
+      "path": "src/android/templates_cmake/.gitignore",
+      "sha256": "fb536b9dda6de450d0aab0581de3e22645c7cb0a623a28878bc6d7970f47d7f3"
+    },
+    {
+      "module": "qtbase",
+      "path": "src/corelib/serialization/.gitignore",
+      "sha256": "59c0b07f560ee767dc36d91875d5cb00682b0d78cb51c39472bd03e7798e766c"
+    },
+    {
+      "module": "qtbase",
+      "path": "src/network/android/jar/.gitignore",
+      "sha256": "73150826af09fb4775f251aadd215dd0b51c22ddd51e5084c9352f0bc4333c04"
+    },
+    {
+      "module": "qtbase",
+      "path": "src/plugins/networkinformation/android/jar/.gitignore",
+      "sha256": "73150826af09fb4775f251aadd215dd0b51c22ddd51e5084c9352f0bc4333c04"
+    },
+    {
+      "module": "qtbase",
+      "path": "tests/auto/cmake/test_qt_extract_metatypes/test_qt_extract_metatypes_project/testdata/.gitattributes",
+      "sha256": "97d1bae76533519da74674734d01f7217f7247a3e6022f33d13eb7d5d3318e5c"
+    },
+    {
+      "module": "qtbase",
+      "path": "tests/auto/corelib/io/qfile/.gitattributes",
+      "sha256": "99006d2af3726d46b0f18d210e8f232a6e7e28ca5247b3c892e10d8233407d6e"
+    },
+    {
+      "module": "qtbase",
+      "path": "tests/auto/corelib/io/qresourceengine/.gitattributes",
+      "sha256": "b5104ba41cb39c3a0b6160d05c838710f7106823b88c8306c433f11931f6700c"
+    },
+    {
+      "module": "qtbase",
+      "path": "tests/auto/corelib/io/qsettings/.gitattributes",
+      "sha256": "9fae759a5eff9f2aca30b6b1fcd8fbe4f342072143905a5adfec75b83edafff1"
+    },
+    {
+      "module": "qtbase",
+      "path": "tests/auto/corelib/io/qzip/.gitignore",
+      "sha256": "a01abf01a99450d4a1771db8de74127061b8367e75810c334f428d539c7dd4f4"
+    },
+    {
+      "module": "qtbase",
+      "path": "tests/auto/corelib/plugin/qpluginloader/elftest/.gitattributes",
+      "sha256": "e7b04dfc1129207d26f5b7563eb9b5a63b48f9430f7fbb937c7dd26264e3b97e"
+    },
+    {
+      "module": "qtbase",
+      "path": "tests/auto/corelib/serialization/qtextstream/.gitattributes",
+      "sha256": "efbf98ab601975de9b11f6c378e55a4b55dd91cc24d3fc18d0030b279be583f5"
+    },
+    {
+      "module": "qtbase",
+      "path": "tests/auto/corelib/serialization/qxmlstream/.gitattributes",
+      "sha256": "8ace4e21bd772d704049838e8414e33a1dd3f6288a3ed39693911a31bdc837df"
+    },
+    {
+      "module": "qtbase",
+      "path": "tests/auto/corelib/text/qbytearray_large/.gitattributes",
+      "sha256": "42747f665eed7f52f0697d2aa28135a9e97522a96eccd57fe93620e6bbd02070"
+    },
+    {
+      "module": "qtbase",
+      "path": "tests/auto/network/access/qnetworkreply/.gitattributes",
+      "sha256": "5c287a827b9b9f6296075d6271f6cba462aae0340eff656ccb8cf7f2ecefe1b9"
+    },
+    {
+      "module": "qtbase",
+      "path": "tests/auto/tools/moc/.gitattributes",
+      "sha256": "34bc85180cf170f3c2e62459d46432230551b702b5e889c7b76f32a7419c371b"
+    },
+    {
+      "module": "qtbase",
+      "path": "tests/auto/tools/rcc/data/.gitattributes",
+      "sha256": "96224ce6e1a5b9c8b5b817a34f5760160c9e7a691cfc276895abade5770f04d9"
+    },
+    {
+      "module": "qtbase",
+      "path": "tests/auto/tools/uic/baseline/.gitattributes",
+      "sha256": "ed028e329be553044373e8ed9244bfc3d45ac07527456ef8417ede3c54800efc"
+    },
+    {
+      "module": "qtbase",
+      "path": "tests/auto/xml/dom/qdom/.gitattributes",
+      "sha256": "0dc79351afb22a0cd9870706e0bad862ede7a011de9b106eccb338d8cb546fad"
+    },
+    {
+      "module": "qtbase",
+      "path": "tests/testserver/apache2/.gitattributes",
+      "sha256": "c10096a73db7062caf08f86c6f89aa4bc7fc8fa71b1dfaf73504a9e33fc77d2f"
+    },
+    {
+      "module": "qtbase",
+      "path": "tests/testserver/apache2/testdata/www/htdocs/rfcs/.gitattributes",
+      "sha256": "3a2a67c422fc9b2e83524a0d7bf250d8543953258a605b8933f6badebd05ca18"
+    },
+    {
+      "module": "qtbase",
+      "path": "tests/testserver/common/.gitattributes",
+      "sha256": "366215eb832802dbfd4176766335f3a95803edcb5dd0297e3e9ebad50ecb194b"
+    },
+    {
+      "module": "qtbase",
+      "path": "tests/testserver/danted/.gitattributes",
+      "sha256": "366215eb832802dbfd4176766335f3a95803edcb5dd0297e3e9ebad50ecb194b"
+    },
+    {
+      "module": "qtbase",
+      "path": "tests/testserver/ftp-proxy/.gitattributes",
+      "sha256": "366215eb832802dbfd4176766335f3a95803edcb5dd0297e3e9ebad50ecb194b"
+    },
+    {
+      "module": "qtbase",
+      "path": "tests/testserver/squid/.gitattributes",
+      "sha256": "366215eb832802dbfd4176766335f3a95803edcb5dd0297e3e9ebad50ecb194b"
+    },
+    {
+      "module": "qtbase",
+      "path": "tests/testserver/vsftpd/.gitattributes",
+      "sha256": "c10096a73db7062caf08f86c6f89aa4bc7fc8fa71b1dfaf73504a9e33fc77d2f"
+    },
+    {
+      "module": "qtbase",
+      "path": "util/gradientgen/.gitignore",
+      "sha256": "f65f77e4099e82afc5835996841c36908feb66a3a46b4b89636bb08dd54ec7f4"
+    },
+    {
+      "module": "qtbase",
+      "path": "util/sbom/cyclonedx/.gitignore",
+      "sha256": "c6dd52059b9cc424e788d6c2b772abbb4fd7fd5be4178197372abffa5b788fa0"
+    },
+    {
+      "module": "qtbase",
+      "path": "util/unicode/.gitattributes",
+      "sha256": "488fc12b79c52aa5ecc325a9893387a9ae51f650b9fec50a81df2cb378442357"
+    },
+    {
+      "module": "qtbase",
+      "path": "util/x86simdgen/.gitignore",
+      "sha256": "928eca40c00bb177f3e147a0205d07312cafc53d9a2dbfe36e6b6fef3e2972ae"
+    },
+    {
+      "module": "qtbase",
+      "path": ".tag",
+      "sha256": "fde074635c6fcb481285e97c063273a231c5ed9dbd034489077ff8d0ef88bdd6"
+    },
+    {
+      "module": "qtsvg",
+      "path": ".gitattributes",
+      "sha256": "07c32053f02ddaa7c354f34487b6d28599a1c559185327e1c77540efb9a406ea"
+    },
+    {
+      "module": "qtsvg",
+      "path": ".gitignore",
+      "sha256": "5052b2e78c497bf0fa38249caf27a8bcd364e728c62bf0301200788ef6054473"
+    },
+    {
+      "module": "qtsvg",
+      "path": "tests/auto/bic/.gitignore",
+      "sha256": "660ee42ab9a4d2608c52b3320dcbd3ea6a12413d6883896e684669156794765b"
+    },
+    {
+      "module": "qtsvg",
+      "path": "tests/auto/qsvggenerator/.gitignore",
+      "sha256": "f7345d3e03ff120f838229338d57c0cd2d68056e0838f8ba615daec34c265d73"
+    },
+    {
+      "module": "qtsvg",
+      "path": "tests/auto/qsvgplugin/.gitignore",
+      "sha256": "39955eae5f1287ea2722042631bd5fe3e64cc4ca30c6233857b2db5620e73146"
+    },
+    {
+      "module": "qtsvg",
+      "path": "tests/auto/qsvgrenderer/.gitattributes",
+      "sha256": "87b0d428745ea46832670f4956d81cceb981441f98bded0d7aba34acd74bf0cf"
+    },
+    {
+      "module": "qtsvg",
+      "path": "tests/auto/qsvgrenderer/.gitignore",
+      "sha256": "e20901f101fc52688609fd33bce4a2673a13ba5e36981449d46dc8e3da4aae13"
+    },
+    {
+      "module": "qtsvg",
+      "path": "tests/global/.gitignore",
+      "sha256": "ceac0e81a141f6ca3162b71b29bf1f18988b29716c97d57e7024014489f7a40d"
+    },
+    {
+      "module": "qtsvg",
+      "path": "tests/manual/rendertestsuite/.gitignore",
+      "sha256": "5e0c02ac0c71dbf0499b95ec3cd281b70919962cb36c16134e02970c4fa647b0"
+    },
+    {
+      "module": "qtsvg",
+      "path": ".tag",
+      "sha256": "fde074635c6fcb481285e97c063273a231c5ed9dbd034489077ff8d0ef88bdd6"
+    }
+  ],
+  "ffmpegTarballCheckedAgainstRecipe": true
 }

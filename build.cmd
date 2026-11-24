@@ -3,7 +3,7 @@ setlocal
 rem Keep localized MSVC include diagnostics readable to CMake/Ninja dependency scanning.
 chcp 65001 >nul
 rem Build from any directory. Override LW_QT_ROOT / LW_NINJA / LW_BUILD_DIR if needed.
-if not defined LW_QT_ROOT set "LW_QT_ROOT=D:\Qt\6.12.0\msvc2022_64"
+if not defined LW_QT_ROOT set "LW_QT_ROOT=D:\Qt\6.12.1\msvc2022_64"
 if not defined LW_NINJA set "LW_NINJA=D:\Qt\Tools\Ninja\ninja.exe"
 if not defined LW_BUILD_DIR set "LW_BUILD_DIR=%~dp0build-cpp23"
 set "LW_VSWHERE=%ProgramFiles(x86)%\Microsoft Visual Studio\Installer\vswhere.exe"
@@ -40,7 +40,7 @@ if exist "%LW_BUILD_DIR%\dist" exit /b 1
 mkdir "%LW_BUILD_DIR%\dist"
 copy /y "%LW_BUILD_DIR%\LuckyWheel.exe" "%LW_BUILD_DIR%\dist\LuckyWheel.exe" >nul
 if errorlevel 1 exit /b 1
-"%LW_QT_ROOT%\bin\windeployqt.exe" --release --no-translations --no-compiler-runtime --exclude-plugins qpdf --dir "%LW_BUILD_DIR%\dist" "%LW_BUILD_DIR%\dist\LuckyWheel.exe"
+"%LW_QT_ROOT%\bin\windeployqt.exe" --release --no-translations --no-compiler-runtime --no-opengl-sw --exclude-plugins qpdf,qtuiotouchplugin,qsqlibase,qsqlmimer,qsqloci,qsqlodbc,qsqlpsql --dir "%LW_BUILD_DIR%\dist" "%LW_BUILD_DIR%\dist\LuckyWheel.exe"
 if errorlevel 1 exit /b 1
 rem Pin the licensed Windows SDK redist rather than a machine-specific system copy.
 if not defined LW_D3D_REDIST set "LW_D3D_REDIST=%ProgramFiles(x86)%\Windows Kits\10\Redist\D3D\x64\d3dcompiler_47.dll"

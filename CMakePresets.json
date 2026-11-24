@@ -1,11 +1,11 @@
 {
   "version": 6,
   "configurePresets": [{
-    "name": "msvc-release", "displayName": "C++23 / Qt 6.12 / MSVC x64 Release",
+    "name": "msvc-release", "displayName": "C++23 / Qt 6.12.1 / MSVC x64 Release",
     "generator": "Ninja", "binaryDir": "${sourceDir}/build-cpp23",
     "cacheVariables": {
       "CMAKE_BUILD_TYPE": "Release",
-      "CMAKE_PREFIX_PATH": "D:/Qt/6.12.0/msvc2022_64",
+      "CMAKE_PREFIX_PATH": "D:/Qt/6.12.1/msvc2022_64",
       "CMAKE_MAKE_PROGRAM": "D:/Qt/Tools/Ninja/ninja.exe"
     }
   }],

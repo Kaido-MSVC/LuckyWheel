@@ -1,5 +1,5 @@
 --
--DFFMPEG_DIR=C:\FFmpeg-n9.0.1\build\msvc\installed
+-DFFMPEG_DIR=C:\FFmpeg-n9.0.2\build\msvc\installed
 -DQT_DEPLOY_FFMPEG=TRUE
 -DFEATURE_clangcpp=OFF
 -DINPUT_headersclean=ON

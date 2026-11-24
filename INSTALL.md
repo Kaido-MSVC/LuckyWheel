@@ -1,25 +1,22 @@
-# LuckyWheel v2.0.9 安裝與資料
+# LuckyWheel v2.1.0 免安裝版與資料
 
-正式下載見 [GitHub Release v2.0.9](https://github.com/Kaido-MSVC/LuckyWheel/releases/tag/v2.0.9)，發布狀態與驗證範圍見 [RELEASE-STATUS.md](RELEASE-STATUS.md)。
-主程式及安裝包未簽章。安裝版採目前使用者安裝，不要求系統管理員權限。
+v2.1.0 提供 Windows x64 免安裝版。主程式目前未簽章。 [正式發布頁](https://github.com/Kaido-MSVC/LuckyWheel/releases/tag/v2.1.0) · [驗證範圍](RELEASE-STATUS.md)
 
-- 安裝：執行 [LuckyWheel-2.0.9-Windows-x64-Setup.exe](https://github.com/Kaido-MSVC/LuckyWheel/releases/download/v2.0.9/LuckyWheel-2.0.9-Windows-x64-Setup.exe)；預設程式目錄為
-  `%LOCALAPPDATA%\Programs\LuckyWheel`，開始選單捷徑固定建立，桌面捷徑可選。
-- 免安裝：完整解壓 [LuckyWheel-2.0.9-Windows-x64-Portable.zip](https://github.com/Kaido-MSVC/LuckyWheel/releases/download/v2.0.9/LuckyWheel-2.0.9-Windows-x64-Portable.zip)，開啟根目錄 `LuckyWheel.exe`。保留 DLL、外掛與授權文件。
+- 完整解壓 ZIP 並開啟根目錄的 `LuckyWheel.exe`。保留 DLL、外掛、授權文件與來源。 [Windows x64 免安裝版](https://github.com/Kaido-MSVC/LuckyWheel/releases/download/v2.1.0/LuckyWheel-2.1.0-Windows-x64-Portable.zip)
 - 資料：預設 `%LOCALAPPDATA%\LuckyWheel\LuckyWheel\luckywheel.sqlite`；實際位置見設定頁。
   可用 `--data-dir` 指定隔離目錄。新捷徑不會繼承自訂參數，應自行保留。
-- 升級：先關閉程式並用程式內「備份 SQLite」，再使用原安裝目錄。安裝不覆寫資料庫。
-  本次未驗證使用者既有安裝的原地升級。
+- 升級時先在舊版備份資料庫，關閉舊版，再從新解壓的資料夾啟動 v2.1.0。使用自訂資料目錄時，沿用原本的 `--data-dir`。
 - 備份：使用程式內備份，選尚未存在的檔名；勿在執行中只複製 SQLite 主檔而遺漏 WAL。
   還原前會產生 before-restore 安全備份。CSV 歷史不能取代完整 SQLite 備份。
-- 解除安裝：只刪除封裝中的程式檔案、捷徑與登錄，保留資料及程式目錄自行加入的檔案。
 
 清除歷史會經過兩次確認，屬於永久刪除；先備份。
 設定鎖用於避免誤操作，資料庫沒有加密，不能防止有檔案權限者改動資料。
 
-Microsoft 元件條款：安裝版需勾選同意；無聲安裝僅在已閱讀並同意條款時使用
-`/S /ACCEPTMS=1`，缺少同意參數會退出而不安裝。Portable 及安裝後首次執行均會
-顯示同意／拒絕，拒絕在開啟資料庫前結束。條款改版後會重新詢問。
+首次執行會顯示 Microsoft 元件條款。若拒絕，程式會在開啟資料庫前結束。條款改版後會重新詢問。
 `microsoft-terms.sha256` 只在所選資料目錄保存同意版本，沒有對外傳送。
 每份完整二進位包都帶有 sources/ 第三方來源 ZIP，請保留它及 licenses/；
 修改 LGPL 庫的建置與替換說明見 licenses/SOURCE-DELIVERY.md。
+
+## v2.0.9 歷史安裝版
+
+v2.0.9 安裝版採目前使用者安裝。預設程式目錄為 `%LOCALAPPDATA%\Programs\LuckyWheel`，會建立開始選單捷徑，可選擇是否建立桌面捷徑。確認已閱讀並同意 Microsoft 元件條款後，可用 `/S /ACCEPTMS=1` 無聲安裝。解除安裝會保留資料及自行加入的檔案。 [v2.0.9 正式發布頁](https://github.com/Kaido-MSVC/LuckyWheel/releases/tag/v2.0.9)
